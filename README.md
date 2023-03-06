@@ -7,7 +7,7 @@
 ### ②cve_vul(manual) 人工补全漏洞信息
 * **CEW.pptx** 介绍CEW的ppt
 * **CVSS.pptx** 介绍CVSS的ppt
-* **CVE-****-**** ** 人工补全的漏洞
+* **CVE-xxxx-xxxx** 人工补全的漏洞
 ### ③info_enhancement
 * **commit** 基于智能深度学习模型的commit扫描方法
  <br/>2 python files 源代码
