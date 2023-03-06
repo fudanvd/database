@@ -4,11 +4,11 @@
 * 墨菲安全分析.docx
 * 悬镜安全.docx
 
-### ②cve_vul(manual) 人工补全漏洞信息
+### ②cve_vul(manual) 人工补全漏洞信息部分
 * **CEW.pptx** 介绍CEW的ppt
 * **CVSS.pptx** 介绍CVSS的ppt
 * **CVE-xxxx-xxxx** 人工补全的漏洞
-### ③info_enhancement
+### ③info_enhancement 信息增强部分
 * **commit** 基于智能深度学习模型的commit扫描方法
  <br/>2 python files 源代码
 * **cwe** 漏洞类型及危害分析方法
@@ -26,10 +26,10 @@
  <br/>CVE Description_CN.txt 翻译后文件
  <br/>CVE Description.txt 翻译前文件
 
-### ④nvd_info
+### ④nvd_info NVD的数据部分
 * **info downloaded from nvd NVD** 网站上爬下来的数据
 
-### ⑤vul_database
+### ⑤vul_database 漏洞数据库部分
 * **vul_database_form.zip**  由json文件转化成可导入数据库的各个表单
 * **漏洞数据库.md/.pdf**  漏洞数据库的解释文档
 
