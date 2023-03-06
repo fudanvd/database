@@ -1,0 +1,2999 @@
+CVE-2022-46171||Tauri是一个用于为所有主要桌面平台构建二进制文件的框架。文件系统glob模式通配符`*`、`?`和`[...]`默认匹配文件路径字面和前导点，这无意中暴露了允许路径的子文件夹内容。没有通配符的作用域不受影响。由于`**`允许子目录，其行为也符合预期。这个问题已经在最新的版本中得到修补，并被回传到目前支持的1.x分支。在发布时，没有已知的解决方法。
+CVE-2022-46172||authentik是一个开源的身份供应商，专注于灵活性和多功能性。在2022.10.4和2022.11.4之前的版本中，任何认证用户都可以通过默认流量创建任意数量的账户。这将规避任何政策，在不希望用户自己创建新账户的情况下。这也可能影响到其他应用程序，因为这些新的基本账户将存在于整个SSO基础设施。默认情况下，新创建的账户不能被登录，因为默认情况下不存在密码重置。然而，密码重设很可能被大多数装置所启用。这个漏洞涉及到默认用户设置流程中使用的用户环境，/api/v3/flows/instances/default-user-settings-flow/execute/。这个问题已经在2022.10.4和2022.11.4版本中修复。
+CVE-2022-46173||Elrond-GO是Elrond网络协议的一个go实现。1.3.50之前的版本存在一个处理问题，当试图处理带有智能合约部署交易数据的跨碎片中继交易时，节点受到影响。这个问题是交易缓存和处理组件之间的关联性不好。如果上述交易发送的气体超过要求，本应返回剩余气体的智能合约结果（SCR交易），会被错误地添加到处理部件没有考虑的缓存中。该节点停止了对元数据块的公证。修复方法实际上是扩大SCR事务在所有其他缓存中的搜索范围，如果它没有在正确的（预期的）分片缓存中找到。目前还没有已知的解决方法。这个问题已经在1.3.50版本中得到修补。
+CVE-2022-46174||efs-utils是一套用于亚马逊弹性文件系统（EFS）的实用工具。在efs-utils v1.34.3及以下版本的亚马逊EFS挂载助手中存在一个潜在的竞赛条件问题。当使用TLS挂载文件系统时，挂载助手在应用TLS隧道之前为stunnel分配了一个本地端口以接收NFS连接。在受影响的版本中，并发的挂载操作可能会分配相同的本地端口，导致挂载操作失败，或者从EFS客户的本地挂载点到该客户的EFS文件系统的不适当的映射。这个问题已经在v1.34.4版本中得到修补。没有推荐的解决方法。我们建议受影响的用户将所安装的efs-utils版本更新到v1.34.4或更高版本。
+CVE-2022-46175||JSON5是对流行的JSON文件格式的扩展，旨在更容易手工编写和维护（例如，用于配置文件）。在1.0.1和2.2.1版本之前，JSON5库的`parse`方法没有限制对名为`__proto__`的键的解析，允许特制的字符串污染结果对象的原型。这个漏洞污染了由`JSON5.parse`返回的对象的原型，而不是全局对象的原型，这就是通常理解的原型污染的定义。然而，污染单个对象的原型，如果该对象后来被用于可信的操作，会对应用程序产生重大安全影响。这个漏洞可以让攻击者在`JSON5.parse`返回的对象上设置任意的、意想不到的键。实际影响取决于应用程序如何利用返回的对象，以及如何过滤不需要的键，但可能包括拒绝服务、跨网站脚本、权限提升，以及在极端情况下，远程代码执行。`JSON5.parse`在解析JSON字符串到对象时，应该限制对`__proto__`键的解析。作为参考，JavaScript中的`JSON.parse`方法忽略了`__proto__`键。只需将上面例子中的`JSON5.parse`改为`JSON.parse`，就可以缓解这个漏洞。此漏洞在1.0.2, 2.2.2和更高版本的json5中得到修补。
+CVE-2022-46176||Cargo是一个Rust包管理器。Rust安全响应工作组被告知，Cargo在通过SSH克隆索引和依赖时没有执行SSH主机密钥验证。攻击者可以利用这一点进行中间人（MITM）攻击。该漏洞已被指定为CVE-2022-46176。所有包含Cargo的1.66.1之前的Rust版本都存在漏洞。请注意，即使你没有明确使用SSH来替代注册表索引或crate依赖，但如果你将git配置为用SSH代替HTTPS连接到GitHub（通过git的[`url.<base>.insteadOf`][1]设置），你可能会受到这个漏洞的影响，因为这将导致你通过SSH克隆crates.io索引。Rust 1.66.1将确保Cargo检查SSH主机密钥，如果服务器的公钥尚未被信任，则中止连接。我们建议大家尽快升级。
+CVE-2022-46177||Discourse是一个选项源讨论平台。在`stable`分支的2.8.14版本和`beta`和`tests-passed`分支的3.0.0.beta16版本之前，当用户请求密码重置链接邮件，然后改变他们的主邮件，旧的重置邮件仍然有效。当旧的重置邮件被用来重置密码时，Discourse账户的主邮件将被重新链接到旧邮件。如果旧的电子邮件地址被泄露或所有权被转移，这将导致账户被接管。然而，这一点通过SiteSetting `email_token_valid_hours`得到了缓解，目前是48小时。用户应该升级到2.8.14或3.0.0.beta15版本以获得补丁。作为一个解决方法，根据需要降低`email_token_valid_hours`。
+CVE-2022-46178||MeterSphere是一个一站式开源持续测试平台，涵盖测试管理、界面测试、UI测试和性能测试。2.5.1之前的版本允许用户上传文件，但不验证文件名，这可能导致将文件上传至任何路径。该漏洞已在2.5.1版本中得到修复。没有解决方法。
+CVE-2022-46179||LiuOS是一个小型Python项目，旨在模仿常规操作系统的功能。版本0.1.0和之前的LiuOS允许攻击者将GITHUB_ACTIONS环境变量设置为空或真以外的任何内容，并跳过认证检查。这个问题在最新的提交（c658b4f3e57258acf5f6207a90c2f2169698ae22）中得到了修补，要求将var设置为true，导致测试脚本运行而不能登录。一个潜在的解决方法是检查GITHUB_ACTIONS环境变量，并将其设置为""（无引号）以使该变量无效，并强制进行凭证检查。
+cve-2022-4618||**拒绝 **不要使用这个候选号码。咨询IDs：无。原因是。该候选人未被其CNA使用。备注：无。
+CVE-2022-46180||Discourse Mermaid（discourse-mermaid-theme-component）允许开源论坛软件Discourse的用户使用Mermaid语法创建图形。1.0.0版本的discourse-mermaid-theme-component的用户如果能够创建帖子，就能够在该帖子上注入任意的HTML。这个问题已经在GitHub仓库的`main`分支中得到修复，1.1.0被命名为补丁版本。管理员可以通过管理界面更新主题组件。作为一种解决方法，管理员可以暂时禁用discourse-mermaid-theme-component。
+CVE-2022-46181||Gotify服务器是一个简单的服务器，用于通过WebSocket实时发送和接收信息。2.2.2之前的版本包含一个XSS漏洞，允许认证的用户上传.html文件。攻击者可以执行客户端脚本，***另一个用户打开一个链接。攻击者有可能接管点击该链接的用户的账户。Gotify的用户界面不会暴露这样的恶意链接，所以攻击者必须让用户在Gotify之外的环境中打开恶意链接。该漏洞已在2.2.2版本中被修复。作为一种解决方法，你可以通过反向代理阻止对`./image`目录下的非图像文件的访问。
+CVE-2022-4619||WordPress的CodeLights插件的侧边栏小工具在1.4以下（包括1.4）的版本中，由于输入消毒和输出转义不足，存在通过 "额外CSS类 "参数进行存储跨站脚本的漏洞。这使得拥有管理员级别及以上权限的认证攻击者有可能在页面中注入任意网页脚本，只要用户访问注入的页面就会执行。这只影响到多站点安装和已禁用 unfiltered_html 的安装。
+CVE-2022-46255||在GitHub企业服务器中发现了一个对限制目录的路径名限制不当的漏洞，使远程代码得以执行。在Pages中添加了一个检查，以确保在解压新内容之前工作目录是干净的，以防止任意文件覆盖的错误。该漏洞仅影响到GitHub Enterprise Server的3.7.0版本，并在3.7.1版本中得到修复。该漏洞通过GitHub Bug Bounty项目被报告。
+CVE-2022-46256在GitHub企业服务器中发现一个路径穿越漏洞，允许在构建GitHub Pages网站时执行远程代码。要利用此漏洞，攻击者需要有在实例上创建和建立 GitHub Pages 网站的权限。该漏洞在3.3.17、3.4.12、3.5.9、3.6.5和3.7.2版本中被修复。该漏洞是通过GitHub Bug Bounty项目报告的。
+CVE-2022-46258||在GitHub Enterprise Server中发现一个不正确的授权漏洞，允许具有读/写权限的存储库范围的令牌修改没有工作流范围的Action Workflow文件。创建或更新文件内容的API应该强制执行工作流范围。该漏洞影响到3.7版之前的所有GitHub Enterprise Server版本，并在3.3.16、3.4.11、3.5.8和3.6.4版中得到修复。该漏洞通过GitHub Bug Bounty项目被报告。
+CVE-2022-46265||在Polarion ALM（所有版本）中发现一个漏洞。受影响的应用程序包含一个主机头注入漏洞，可能允许攻击者欺骗主机头信息并将用户重定向到恶意网站。
+CVE-2022-46282||CX-Drive V3.00 及更早版本中的自由使用漏洞允许本地攻击者通过让用户打开特制文件执行任意代码。
+CVE-2022-46287||DENSHI NYUSATSU CORE SYSTEM v6 R4及以前版本中的跨站脚本漏洞，允许远程未认证的攻击者注入任意脚本。
+CVE-2022-46288||DENSHI NYUSATSU CORE SYSTEM v6 R4和更早版本中的开放重定向漏洞允许远程未认证的攻击者将用户重定向到任意网站，并通过让用户访问特制的URL进行钓鱼攻击。
+CVE-2022-4630||GitHub 存储库 lirantal/daloradius 在 master 之前没有'HttpOnly'标志的敏感 Cookie。
+CVE-2022-46304||ChangingTec ServiSign组件对连接响应参数中的特殊字符过滤不足。未经认证的远程攻击者可以托管一个恶意网站供组件用户访问，这将触发命令注入，并允许攻击者执行任意系统命令以执行任意系统操作或破坏服务。
+CVE-2022-46305||ChangingTec ServiSign组件存在路径穿越漏洞。未经认证的局域网攻击者可以利用此漏洞绕过认证并访问任意系统文件。
+CVE-2022-46306||ChangingTec ServiSign组件由于对DLL文件路径中的特殊字符过滤不足，存在路径穿越漏洞。未经认证的远程攻击者可以托管一个恶意网站供组件用户访问，从而触发组件在任意文件路径下加载恶意DLL文件，允许攻击者执行任意系统操作和破坏服务。
+CVE-2022-46309||Vitals ESP上传功能存在路径穿越漏洞。具有一般用户权限的远程攻击者可以利用此漏洞访问任意系统文件。
+CVE-2022-4631||在WP-Ban中发现一个漏洞，该漏洞被列为有问题。受影响的是文件ban-options.php的一个未知功能。该操作会导致跨网站脚本攻击。有可能远程发起攻击。该补丁的名称是22b925449c84faa9b7496abe4f8f5661cb5eb3bf。建议升级受影响的组件。该漏洞的标识符为VDB-216480。
+CVE-2022-46310||TelephonyProvider模块在获取数值方面存在漏洞。成功利用该漏洞可能会影响数据保密性。
+CVE-2022-46311||联系人组件有一个自由（未定义）提供者的漏洞。成功利用此漏洞可能会影响数据的完整性。
+CVE-2022-46312||应用管理模块在权限验证中存在漏洞。成功利用该漏洞会导致设备应用程序意外清除。
+CVE-2022-46313||传感器隐私模块有一个验证漏洞。成功利用该漏洞可能导致智能手机的摄像头和麦克风不可用。
+CVE-2022-46314||IPC模块在设计过程中引入缺陷。成功利用此漏洞可能会影响系统可用性。
+CVE-2022-46315||ProfileSDK在设计过程中引入了缺陷。成功利用此漏洞可能会影响系统的可用性。
+CVE-2022-46316||认证过程中存在一个线程安全漏洞。成功利用此漏洞可能影响数据完整性、保密性和可用性。
+CVE-2022-46317||耗电模块存在越界读取漏洞。成功利用此漏洞可能会影响系统的可用性。
+CVE-2022-46318||HAware模块有一个函数逻辑错误。成功利用此漏洞将影响设置中的账户删除功能。
+CVE-2022-46319||指纹校准存在缺乏边界判断的漏洞。成功利用此漏洞可能导致越界写入。
+CVE-2022-4632||在3.3.0以下的自动上传图片中发现一个漏洞，并将其归类为有问题。受该漏洞影响的是一个未知功能。该操作会导致跨网站脚本。该攻击可以远程启动。升级到3.3.1版本能够解决这个问题。该补丁的名称是895770ee93887ec78429c78ffb865bee6f9436。建议升级受影响的组件。识别码VDB-216481被分配给这个漏洞。
+CVE-2022-46320||内核模块存在越界读取漏洞。成功利用此漏洞可能导致内存被覆盖。
+CVE-2022-46321||Wi-Fi 模块在权限验证中存在漏洞。成功利用此漏洞可能会影响数据保密性。
+CVE-2022-46322||一些智能手机存在越界写入漏洞。成功利用此漏洞可能导致系统服务异常。
+CVE-2022-46323||部分智能手机存在越界写入漏洞。成功利用此漏洞可能导致系统服务异常。
+CVE-2022-46324||部分智能手机存在越界写入漏洞。成功利用该漏洞可能导致系统服务异常。
+CVE-2022-46325||部分智能手机存在越界写入漏洞。成功利用此漏洞可能导致系统服务异常。
+CVE-2022-46326||一些智能手机存在越界写入漏洞。成功利用此漏洞可能导致系统服务异常。
+CVE-2022-46327||一些智能手机有配置问题。成功利用此漏洞可能导致权限升级，从而导致系统服务异常。
+CVE-2022-46328||部分智能手机存在输入验证漏洞。成功利用此漏洞可能影响数据保密性。
+CVE-2022-4633||在3.3.0以下的自动上传图片中发现一个漏洞，并被列为有问题。受此问题影响的是组件Settings Handler的src/setting-page.php文件的一些未知功能。该操作会导致跨站请求伪造。该攻击可能是远程发起的。升级到3.3.1版本能够解决这个问题。该补丁的名称是895770ee93887ec78429c78ffb865bee6f9436。建议升级受影响的组件。VDB-216482是分配给这个漏洞的标识符。
+CVE-2022-46330||Squirrel.Windows既是一个工具集也是一个库，为Windows桌面应用程序提供安装和更新功能。由Squirrel.Windows 2.0.1和更早版本生成的安装程序包含一个DLL搜索路径的问题，这可能导致不安全地加载动态链接库。因此，任意代码可能以调用安装程序的用户的权限被执行。
+CVE-2022-46332||Proofpoint企业防护（PPS/PoD）中的管理员智能搜索功能包含一个存储的跨站脚本漏洞，使匿名电子邮件发送者能够在用户界面内获得管理员权限。这影响到所有8.19.0及以下版本。
+CVE-2022-46333||Proofpoint Enterprise Protection (PPS/PoD)的管理员用户界面包含一个命令注入漏洞，使管理员能够执行超出其允许范围的命令。这影响到所有8.19.0及以下版本。
+CVE-2022-46334||Proofpoint企业保护（PPS/PoD）包含一个漏洞，允许pps用户由于不必要的权限而升级到root权限。这影响到所有8.19.0及以下版本。
+cve-2022-46335||**拒绝 **不要使用这个候选号码。ConsultIDs: none.原因是。该候选程序未被其CNA使用。备注：无。
+CVE-2022-46336||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46338||g810-led 0.4.2，一个用于罗技Gx10键盘的LED配置工具，包含一个udev规则，使支持的设备节点是世界可读和可写的，允许系统中的任何进程读取键盘的流量，包括敏感数据。
+CVE-2022-46340||在X.Org中发现一个漏洞。这个安全漏洞是由于XTest扩展的XTestFakeInput请求的交换处理程序可能会破坏堆栈，如果长度大于32字节的GenericEvents通过XTestFakeInput请求被发送。这个问题可能会导致在X服务器运行特权的系统上的本地权限提升，以及ssh X转发会话的远程代码执行。这个问题不影响客户端和服务器使用相同字节顺序的系统。
+CVE-2022-46341||在X.Org中发现一个漏洞。该安全漏洞是由于XIPassiveUngrab请求的处理程序在用高键码或按钮代码调用时访问了越界内存。这个问题可能导致在X服务器运行特权的系统上的本地权限提升，以及对ssh X转发会话的远程代码执行。
+CVE-2022-46342||在X.Org发现一个漏洞。该安全漏洞的出现是因为XvdiSelectVideoNotify请求的处理程序可能在内存被释放后写入内存。这个问题可能导致在X.Org系统上的本地权限提升。
+CVE-2022-46343||在X.Org中发现一个漏洞。由于ScreenSaverSetAttributes请求的处理程序可能在内存被释放后写入内存，因此出现该安全漏洞。这个问题可能导致在X服务器运行特权的系统上出现本地权限提升，以及对ssh X转发会话进行远程代码执行。
+CVE-2022-46344||在X.Org发现一个漏洞。该安全漏洞是由于XIChangeProperty请求的处理程序存在长度验证问题，导致越界内存读取和潜在信息泄露。这个问题可能导致在X服务器运行有特权的系统上的本地权限提升，以及对ssh X转发会话的远程代码执行。
+CVE-2022-46345||在Parasolid V33.1（所有版本<V33.1.264）、Parasolid V34.0（所有版本<V34.0.252）、Parasolid V34.1（所有版本<V34.1.242）、Parasolid V35.0（所有版本<V35.0.170）发现一个漏洞。受影响的应用程序在解析特制的X_B文件时，包含一个超过分配结构末端的超界写入。这可能允许攻击者在当前进程的上下文中执行代码。(zdi-can-19070)
+CVE-2022-46346||在Parasolid V33.1（所有版本<V33.1.264）、Parasolid V34.0（所有版本<V34.0.252）、Parasolid V34.1（所有版本<V34.1.242）、Parasolid V35.0（所有版本<V35.0.170）发现一个漏洞。受影响的应用程序在解析特制的X_B文件时，包含一个超过分配结构末端的超界写入。这可能允许攻击者在当前进程的上下文中执行代码。(zdi-can-19071)
+CVE-2022-46347||在Parasolid V33.1（所有版本<V33.1.264）、Parasolid V34.0（所有版本<V34.0.252）、Parasolid V34.1（所有版本<V34.1.242）、Parasolid V35.0（所有版本<V35.0.170）发现一个漏洞。受影响的应用程序在解析特制的X_B文件时，包含一个超过分配结构末端的超界写入。这可能允许攻击者在当前进程的上下文中执行代码。(zdi-can-19079)
+CVE-2022-46348||在Parasolid V33.1（所有版本<V33.1.264）、Parasolid V34.0（所有版本<V34.0.252）、Parasolid V34.1（所有版本<V34.1.242）、Parasolid V35.0（所有版本<V35.0.170）发现一个漏洞。受影响的应用程序在解析特制的X_B文件时，包含一个超过分配结构末端的超界写入。这可能允许攻击者在当前进程的上下文中执行代码。(zdi-can-19383)
+CVE-2022-46349||在Parasolid V33.1（所有版本<V33.1.264）、Parasolid V34.0（所有版本<V34.0.252）、Parasolid V34.1（所有版本<V34.1.242）、Parasolid V35.0（所有版本<V35.0.170）发现一个漏洞。受影响的应用程序在解析特制的X_B文件时，包含一个超过分配结构末端的越界读取。这可能允许攻击者在当前进程的上下文中执行代码。(zdi-can-19384)
+CVE-2022-46350||在 SCALANCE X204RNA (HSR) （所有版本 < V3.2.7）、SCALANCE X204RNA (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (HSR) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP/HSR) （所有版本 < V3.2.7）。如果毫无戒心的用户被骗访问恶意链接，集成的 Web 服务器可能允许跨站脚本 (XSS) 攻击。攻击者可利用这一点，在受影响的设备上触发恶意请求。
+CVE-2022-46351||在SCALANCE X204RNA (HSR)（所有版本<V3.2.7）、SCALANCE X204RNA (PRP)（所有版本<V3.2.7）、SCALANCE X204RNA EEC (HSR)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP/HSR) （所有版本 < V3.2.7）。特别制作的 PROFINET DCP 数据包可能导致本地以太网段（第 2 层）上受影响产品的拒绝服务情况。
+CVE-2022-46352||在 SCALANCE X204RNA (HSR) （所有版本 < V3.2.7）、SCALANCE X204RNA (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (HSR)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP/HSR) （所有版本 < V3.2.7）。特别制作的 PROFINET DCP 数据包可能导致受影响产品出现拒绝服务情况。
+CVE-2022-46353||在 SCALANCE X204RNA (HSR) （所有版本 < V3.2.7）、SCALANCE X204RNA (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (HSR)（所有版本< V3.2.7）、SCALANCE X204RNA EEC (PRP)（所有版本< V3.2.7）、SCALANCE X204RNA EEC (PRP/HSR)（所有版本< V3.2.7）。受影响设备的 Webserver 以不安全的方式计算会话 ID 和 nonces。这可能允许未经认证的远程攻击者强行获取会话ID并劫持现有会话。
+CVE-2022-46354||在 SCALANCE X204RNA (HSR)（所有版本 < V3.2.7）、SCALANCE X204RNA (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC (HSR)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP)（所有版本 < V3.2.7）、SCALANCE X204RNA EEC (PRP/HSR) （所有版本 < V3.2.7）。受影响设备的网络服务器缺少特定的安全标头。这可能允许远程攻击者在某些情况下提取机密会话信息。
+CVE-2022-46355||在 SCALANCE X204RNA (HSR) （所有版本 < V3.2.7）、SCALANCE X204RNA (PRP) （所有版本 < V3.2.7）、SCALANCE X204RNA EEC（HSR）（所有版本<V3.2.7）、SCALANCE X204RNA EEC（PRP）（所有版本<V3.2.7）、SCALANCE X204RNA EEC（PRP/HSR）（所有版本<V3.2.7）。受影响的产品存在 "敏感信息暴露给未经授权的行为者 "的漏洞，该漏洞会泄露HTTP Referer中的敏感数据。
+型号为ACR1000A-R-R2、ACR1000A-T-R2、ACR1002A-T、ACR1002A-R和ACR1020A-T的黑匣子KVM固件版本3.4.31307存在路径穿越漏洞，攻击者可通过本地文件包含窃取用户凭证和其他敏感信息。
+CVE-2022-46360||V-SFT v6.1.7.0及以前版本和TELLUS v4.0.12.0及以前版本中存在越界读取漏洞，允许本地攻击者通过让用户打开特制的图像文件来获取信息和/或执行任意代码。
+CVE-2022-46363||Apache CXF在3.5.5和3.4.10版本之前的一个漏洞允许攻击者执行远程目录列表或代码渗出。该漏洞仅适用于CXFServlet配置了static-resources-list和redirect-query-check属性时。这些属性不应该一起使用，因此只有在CXF服务被错误配置的情况下才会出现该漏洞。
+CVE-2022-46364||在3.5.5和3.4.10之前的Apache CXF版本中，解析MTOM请求中XOP:Include的href属性时存在SSRF漏洞，允许攻击者对至少接受一个任何类型参数的Web服务进行SSRF式攻击。
+CVE-2022-46366||**分配时不支持 ** Apache Tapestry 3.x允许反序列化不受信任的数据，导致远程代码执行。这个问题与CVE-2020-17531相似但不同，后者适用于（同样不支持的）4.x版本线。注意：该漏洞只影响Apache Tapestry 3.x版本线，维护者已不再支持该版本。建议用户升级到Apache Tapestry的支持版本线。
+CVE-2022-46367||Rumpus - FTP服务器跨站请求伪造（CSRF）-特权升级漏洞，可能允许特权升级。
+CVE-2022-46368||Rumpus - FTP服务器9.0.7.1版跨站请求伪造（CSRF）--漏洞可能允许代表认证用户进行未授权操作。
+CVE-2022-46369||Rumpus - FTP服务器版本9.0.7.1持久性跨站脚本（PXSS） - 漏洞可能允许将脚本插入到未指定的输入字段。
+CVE-2022-4637||在1.7.x以下的ep3-bs中发现一个被列为问题的漏洞，这影响到一个未知的部分。该操作导致跨网站脚本攻击。有可能从远程发起攻击。升级到1.8.0版本能够解决这个问题。该补丁的名称是ef49e709c8adecc3a83cdc6164a67162991d2213。建议升级受影响的组件。该漏洞的相关标识符为VDB-216495。
+CVE-2022-46370||Rumpus - FTP服务器版本9.0.7.1不正确的令牌验证--漏洞可能允许绕过身份验证。
+CVE-2022-46371||Alotcer - AR7088H-A固件版本16.10.3信息泄露。未指明的错误信息包含默认的管理员用户名。
+CVE-2022-46372||Alotcer - AR7088H-A firmware version 16.10.3 命令执行 对未指定的输入字段进行不当验证，可能允许验证的命令执行。
+CVE-2022-4638||在collective.contact.widget至1.12版本中发现一个归类为问题的漏洞。该漏洞影响了 src/collective/contact/widget/widgets.py 文件中的函数标题。该操作会导致跨网站脚本攻击。攻击可以从远程发起。该补丁的名称是5da36305ca7ed433782be8901c47387406fcda12。建议应用补丁来修复这个问题。该漏洞的标识符为VDB-216496。
+CVE-2022-46381||某些Linear eMerge E3-Series设备存在通过类型参数（例如，对badging/badge_template_v0.php组件）的XSS漏洞。这影响到0.32-08f, 0.32-07p, 0.32-07e, 0.32-09c, 0.32-09b, 0.32-09a, 和 0.32-08e。
+CVE-2022-46382||RackN Digital Rebar through 4.6.14, 4.7 through 4.7.22, 4.8 through 4.8.5, 4.9 through 4.9.12, and 4.10 through 4.10.8有不安全的权限。在登录到Digital Rebar后，用户会获得与他们的账户绑定的认证令牌，以便在Digital Rebar中执行操作。在这些令牌的验证过程中，Digital Rebar没有检查用户账户是否仍然存在。被删除的Digital Rebar用户仍然可以使用他们的令牌在Digital Rebar中执行操作。
+CVE-2022-46383||RackN Digital Rebar通过4.6.14、4.7至4.7.22、4.8至4.8.5、4.9至4.9.12和4.10至4.10.8，通过公共API端点暴露了一个特权令牌（访问控制不正确）。该令牌可被用于提升Digital Rebar系统内的权限，并授予完全的管理权限。
+CVE-2022-4639||在sslh中发现一个漏洞，该漏洞被归类为关键。该问题影响到组件包倾倒处理程序的文件probe.c的函数hexdump。对参数msg_info的操作导致了格式化字符串。该攻击可能是远程启动的。该补丁的名称是b19f8a6046b080e4c2e28354a58556bb26040c6f。建议应用一个补丁来修复这个问题。识别码VDB-216497被分配给这个漏洞。
+CVE-2022-46391||AWStats 7.x to 7.8由于打印来自Net::XWhois的响应而没有适当检查，允许在hostinfo插件中使用XSS。
+CVE-2022-46392||在2.28.2之前的Mbed TLS和3.3.0之前的3.x发现一个问题。如果用于指数化的窗口大小（MBEDTLS_MPI_WINDOW_SIZE）为3或更小，能够获得足够精确的内存访问信息的对手（通常是攻击安全飞地的不受信任的操作系统）可以在观察受害者执行单个私钥操作后恢复RSA私钥。
+CVE-2022-46393||在2.28.2之前的Mbed TLS和3.3.0之前的3.x中发现一个问题。如果MBEDTLS_SSL_DTLS_CONNECTION_ID被启用且MBEDTLS_SSL_CID_IN_LEN_MAX > 2 * MBEDTLS_SSL_CID_OUT_LEN_MAX，DTLS中可能存在基于堆的缓冲区溢出和基于堆的缓冲区超读。
+CVE-2022-46399||Microchip RN4870模块固件1.43（以及Microchip PIC LightBlue Explorer Demo 4.2 DT100112）在ConReqTimeoutZero时无响应。
+CVE-2022-4640||在Mingsoft MCMS 5.2.9中发现一个漏洞，并将其列为问题。受该漏洞影响的是组件Article Handler的功能保存。该操作会导致跨网站脚本攻击。该攻击可以远程启动。该漏洞已向公众披露，并可能被使用。建议升级受影响的组件。该漏洞的相关标识符为VDB-216499。
+CVE-2022-46400||Microchip RN4870模块固件1.43（和Microchip PIC LightBlue Explorer Demo 4.2 DT100112）允许攻击者在传统配对中绕过密码输入。
+CVE-2022-46401||Microchip RN4870模块固件1.43（和Microchip PIC LightBlue Explorer Demo 4.2 DT100112）在配对完成前接受PauseEncReqPlainText。
+CVE-2022-46402||Microchip RN4870模块固件1.43（以及Microchip PIC LightBlue Explorer Demo 4.2 DT100112）接受PairCon_rmSend，其值不正确。
+CVE-2022-46403||Microchip RN4870模块固件1.43（和Microchip PIC LightBlue Explorer Demo 4.2 DT100112）错误地处理拒绝信息。
+CVE-2022-46404||在Atos Unify OpenScape 4000 Assistant和Unify OpenScape 4000 Manager（R2.22.18之前的8，0.28.13之前的10，以及R1.34.4之前的10 R1）中发现一个命令注入漏洞，可能允许未经认证的攻击者上传任意文件并实现对系统的管理访问。
+CVE-2022-46405||Mastodon到4.0.2允许攻击者通过创建机器人账户，跟踪与通配符DNS A记录相关的某些其他服务器上攻击者控制的账户，从而导致拒绝服务（大型Sidekiq拉动队列），从而使攻击者生成的消息出现不受控制的递归。
+CVE-2022-4641||在pig-vector中发现一个漏洞，并将其归类为有问题。受此问题影响的是文件 src/main/java/org/apache/mahout/pig/LogisticRegression.java 中的函数 LogisticRegression。该操作导致了不安全的临时文件。该攻击需要在本地进行处理。该补丁的名称是1e7bd9fab5401a2df18d2eabd802adcf0dcf1f15。建议应用补丁来修复这个问题。该漏洞的标识符为VDB-216500。
+CVE-2022-46410||在Veritas NetBackup Flex Scale through 3.0中发现一个问题。拥有非root权限的攻击者可以通过使用特定的命令将权限提升到root。
+CVE-2022-46411||在Veritas NetBackup Flex Scale 3.0及Access Appliance 8.0.100發現一個問題。默认密码在安装后持续存在，可能被发现并用于提升权限。
+CVE-2022-46412 在 Veritas NetBackup Flex Scale (至 3.0) 中發現一個問題。非特权用户可能会逃脱限制性的外壳并执行特权命令。
+CVE-2022-46413||在 Veritas NetBackup Flex Scale (3.0) 和 Access Appliance (8.0.100) 中发现一个问题。通过管理门户可以发生认证的远程命令执行。
+CVE-2022-46414||在Veritas NetBackup Flex Scale (至3.0)和Access Appliance (至8.0.100)中發現一個問題。未经认证的远程命令执行可通过管理门户发生。
+CVE-2022-4642||在 tatoeba2 中发现一个漏洞。它已被归类为有问题的。这影响到组件Profile Name Handler的一个未知部分。该操作导致跨网站脚本攻击。有可能远程发起攻击。该漏洞已被披露给公众，并可能被使用。升级到版本prod_2022-10-30能够解决这个问题。该补丁的名称是91110777fc8ddf1b4a2cf4e66e67db69b9700361。建议升级受影响的组件。识别码VDB-216501被分配给这个漏洞。
+CVE-2022-46421||Apache Software Foundation Apache Airflow Hive Provider中使用的特殊元素的不当中和（"命令注入"）漏洞。该问题影响Apache Airflow Hive Provider：5.0.0之前。
+CVE-2022-46422||Netgear WNR2000 v1 1.2.3.7及更早版本中的一个问题，允许身份验证的攻击者在固件更新过程中通过上传精心制作的固件图像造成拒绝服务（DoS）。
+CVE-2022-46423||在Netgear WNR2000v1路由器上发现一个可利用的固件修改漏洞。攻击者可以进行MITM（中间人）攻击，修改用户上传的固件镜像并绕过CRC检查，允许攻击者执行任意代码或造成拒绝服务（DoS）。这影响到V1.2.3.7版和更早的版本。
+CVE-2022-46424||在Netgear XWN5001 Powerline 500 WiFi接入点发现一个可利用的固件修改漏洞。攻击者可以进行MITM（中间人）攻击，修改用户上传的固件镜像并绕过CRC检查，允许攻击者执行任意代码或造成拒绝服务（DoS）。这影响到0.4.1.1版和更早的版本。
+CVE-2022-46428||TP-Link TL-WR1043ND V1 3.13.15及更早版本允许认证的攻击者在固件更新过程中通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-4643在docconv 1.2.0以下版本中发现一个漏洞，已被宣布为关键漏洞。该漏洞影响了文件pdf_ocr.go中的ConvertPDFImages函数。对参数路径的操作导致了os命令的注入。该攻击可在远程启动。升级到1.2.1版本能够解决这个问题。该补丁的名称是b19021ade3d0b71c89d35cb00eb9e589a121faa5。建议升级受影响的组件。VDB-216502是分配给该漏洞的标识符。
+CVE-2022-46430||TP-Link TL-WR740N V1和V2 v3.12.4及更早版本允许认证的攻击者在固件更新过程中通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-46432||在TP-Link TL-WR743ND V1上發現一個可利用的固件修改漏洞。攻击者可以进行MITM（中间人）攻击，修改用户上传的固件镜像并绕过CRC检查，允许攻击者执行任意代码或造成拒绝服务（DoS）。这影响到v3.12.20和更早的版本。
+CVE-2022-46434||TP-Link TL-WA7510N v1 v3.12.6及更早版本的固件更新过程中的一个问题，允许攻击者通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-46435||TP-Link TL-WR941ND V2/V3至3.13.9和TL-WR941ND V4至3.12.8的固件更新过程中的一个问题，允许攻击者通过上传精心制作的固件图像执行任意代码或造成拒绝服务（DoS）。
+CVE-2022-46438||DouPHP v1.7 20221118的/admin/article_category.php组件中存在跨站脚本（XSS）漏洞，允许攻击者通过注入描述参数的精心制作的有效载荷执行任意网页脚本或HTML。
+CVE-2022-4644||GitHub仓库ikus060/rdiffweb在2.5.4之前存在开放重定向。
+CVE-2022-46442||dedecms <=V5.7.102容易受到SQL注入。在sys_ sql_ n query.php中，没有对sql查询的限制。
+CVE-2022-46443||mesinkasir Bangresto 1.0容易通过 itemqty%5B%5D 参数进行SQL注入。
+CVE-2022-46449||MPD (Music Player Daemon) v0.23.10中的一个问题允许攻击者通过伪造的输入造成拒绝服务（DoS）。
+CVE-2022-46456||NASM v2.16被发现在/output/outdbg.c的组件dbgdbg_typevalue中包含全局缓冲区溢出。
+CVE-2022-46457||NASM v2.16被发现在/output/outieee.c的组件ieee_write_file中存在分段违规。
+CVE-2022-4646||GitHub 仓库ikus060/rdiffweb在2.5.4之前存在跨站请求伪造（CSRF）。
+CVE-2022-46463||Harbor v1.X.X至v2.5.3中的访问控制问题，允许攻击者在未经认证的情况下访问公共和私人图像库。
+CVE-2022-46464||ConcreteCMS v9.1.3被发现容易受到Xpath注入攻击。该漏洞允许攻击者通过注入URL路径文件夹 "3 "中的精心制作的有效载荷来访问敏感的XML数据。
+CVE-2022-4647||跨站脚本(XSS) - 存储在1.3.2之前的GitHub存储库microweber/microweber。
+CVE-2022-46471||Online Health Care System v1.0被发现通过/healthcare/Admin/consulting_detail.php的consulting_id参数存在SQL注入漏洞。
+CVE-2022-46472||Helmet Store Showroom Site v1.0被发现在/hss/classes/Users.php?f=delete处通过id参数包含一个SQL注入漏洞。
+CVE-2022-46478||datax-web v1.0.0和v2.0.0至v2.1.2中的RPC接口默认不包含权限检查，允许攻击者通过制作的Hessian序列化数据执行任意命令。
+CVE-2022-46489||GPAC 2.1-DEV-rev505-gb9577e6ad-master版本被发现通过box_funcs.c的gf_isom_box_parse_ex函数包含一个内存泄漏。
+CVE-2022-46490||GPAC version 2.1-DEV-rev505-gb9577e6ad-master被发现通过box_code_adobe.c的afrt_box_read函数包含一个内存泄漏。
+CVE-2022-46491||默认版本nbnbk的添加管理员功能存在跨站请求伪造（CSRF）漏洞，允许攻击者任意添加管理员账户。
+CVE-2022-46492||nbnbk commit 879858451d53261d10f77d4709aee2d01c72c301被发现包含一个通过组件/api/Index/getFileBinary的任意文件读取漏洞。
+CVE-2022-46493||默认版本的nbnbk被发现通过组件/api/User/download_img包含一个任意文件上传漏洞。
+CVE-2022-46502||Online Student Enrollment System v1.0被发现通过/student_enrollment/admin/login.php的用户名参数存在SQL注入漏洞。
+CVE-2022-46503||在线学生注册系统v1.0版的/admin/register.php组件中存在跨站脚本（XSS）漏洞，允许攻击者通过注入name参数的精心制作的有效载荷执行任意网页脚本。
+CVE-2022-46530||Tenda F1203 V2.0.1.6被发现在/goform/GetParentControlInfo包含一个通过mac参数的缓冲区溢出。
+CVE-2022-46531||Tenda F1203 V2.0.1.6被发现在/goform/addWifiMacFilter中通过deviceId参数包含缓冲区溢出。
+CVE-2022-46532||Tenda F1203 V2.0.1.6被发现在/goform/addWifiMacFilter中通过deviceMac参数包含缓冲区溢出。
+CVE-2022-46533||Tenda F1203 V2.0.1.6被发现通过/goform/SetClientState的limitSpeed参数包含缓冲区溢出。
+CVE-2022-46534||天达F1203 V2.0.1.6被发现通过/goform/SetSpeedWan的speed_dir参数包含一个缓冲区溢出。
+CVE-2022-46535||Tenda F1203 V2.0.1.6被发现在/goform/SetClientState中通过deviceId参数包含缓冲区溢出。
+CVE-2022-46536||Tenda F1203 V2.0.1.6被发现通过/goform/SetClientState的limitSpeedUp参数包含缓冲区溢出。
+CVE-2022-46537||Tenda F1203 V2.0.1.6被发现通过/goform/WifiBasicSet的安全参数包含一个缓冲区溢出。
+CVE-2022-46538||Tenda F1203 V2.0.1.6被发现通过/goform/WriteFacMac的mac参数包含一个命令注入漏洞。
+CVE-2022-46539||天达F1203 V2.0.1.6被发现通过/goform/WifiBasicSet的security_5g参数包含一个缓冲区溢出。
+CVE-2022-46540||Tenda F1203 V2.0.1.6被发现通过/goform/addressNat的entrys参数包含缓冲区溢出。
+CVE-2022-46541||Tenda F1203 V2.0.1.6被发现通过/goform/fast_setting_wifi_set的ssid参数包含缓冲区溢出。
+CVE-2022-46542||Tenda F1203 V2.0.1.6被发现通过/goform/addressNat的page参数包含一个缓冲区溢出。
+CVE-2022-46543||天达F1203 V2.0.1.6被发现通过/goform/addressNat的mitInterface参数包含缓冲区溢出。
+CVE-2022-46544||天达F1203 V2.0.1.6被发现通过/goform/exeCommand的cmdinput参数包含缓冲区溢出。
+CVE-2022-46545||天达F1203 V2.0.1.6被发现通过/goform/NatStaticSetting的page参数包含缓冲区溢出。
+CVE-2022-46546||天达F1203 V2.0.1.6被发现通过/goform/RouteStatic的entrys参数包含缓冲区溢出。
+CVE-2022-46547||天达F1203 V2.0.1.6被发现通过/goform/VirtualSer的page参数包含缓冲区溢出。
+CVE-2022-46548||天大F1203 V2.0.1.6被发现通过/goform/DhcpListClient的页面参数包含缓冲区溢出。
+CVE-2022-46549||Tenda F1203 V2.0.1.6被发现通过/goform/saveParentControlInfo的deviceId参数包含缓冲区溢出。
+CVE-2022-46550||Tenda F1203 V2.0.1.6被发现通过/goform/saveParentControlInfo的urls参数包含一个缓冲区溢出。
+CVE-2022-46551||天达F1203 V2.0.1.6被发现通过/goform/saveParentControlInfo的时间参数包含缓冲区溢出。
+CVE-2022-46560||D-Link DIR-882 DIR882A1_FW130B06被发现在SetWan2Settings模块中通过密码参数包含堆栈溢出。
+CVE-2022-46561||D-Link DIR-882 DIR882A1_FW130B06被发现在SetWanSettings模块中通过密码参数包含堆栈溢出。
+CVE-2022-46562||D-Link DIR-882 DIR882A1_FW130B06被发现在SetQuickVPNSettings模块中通过PSK参数包含堆栈溢出。
+CVE-2022-46563||D-Link DIR-882 DIR882A1_FW130B06被发现在SetDynamicDNSSettings模块中通过密码参数包含堆栈溢出。
+CVE-2022-46566||D-Link DIR-882 DIR882A1_FW130B06被发现通过SetQuickVPNSettings模块中的密码参数包含堆栈溢出。
+CVE-2022-46568||D-Link DIR-882 DIR882A1_FW130B06被发现通过SetSysEmailSettings模块中的AccountPassword参数，包含一个堆栈溢出。
+CVE-2022-46569||D-Link DIR-882 DIR882A1_FW130B06被发现在SetWLanRadioSecurity模块中通过Key参数包含堆栈溢出。
+CVE-2022-46570||D-Link DIR-882 DIR882A1_FW130B06被发现在SetWan3Settings模块中通过密码参数包含堆栈溢出。
+CVE-2022-46580||TRENDnet TEW755AP 1.13B01被发现通过wifi_captive_portal函数中的user_edit_page参数包含堆栈溢出。
+CVE-2022-46581||TRENDnet TEW755AP 1.13B01被发现通过tools_nslookup函数中的cameo.cameo.nslookup_target参数包含堆栈溢出。
+CVE-2022-46582||TRENDnet TEW755AP 1.13B01被发现通过do_graph_auth (sub_4061E0)函数中的login_name参数包含一个堆栈溢出。
+CVE-2022-46583||TRENDnet TEW755AP 1.13B01被发现通过wizard_ipv6 (sub_41C380)函数中的reboot_type参数包含堆栈溢出。
+CVE-2022-46584||TRENDnet TEW755AP 1.13B01被发现通过 kick_ban_wifi%d_vap%d.maclist (sub_415D7C) 函数中的qcawifi.wifi%d_vap%d.maclist参数包含堆栈溢出。
+CVE-2022-46585||TRENDnet TEW755AP 1.13B01被发现在get_access (sub_45AC2C)函数中通过REMOTE_USER参数包含一个堆栈溢出。
+CVE-2022-46586||TRENDnet TEW755AP 1.13B01被发现在 kick_ban_wifi_mac_allow (sub_415B00) 函数中通过qcawifi.wifi%d_vap%d.maclist参数含有堆栈溢出。
+CVE-2022-46588||TRENDnet TEW755AP 1.13B01被发现通过setup_wizard_mydlink (sub_4104B8)函数中的sys_service参数包含堆栈溢出。
+CVE-2022-46589||TRENDnet TEW755AP 1.13B01被发现通过tools_netstat (sub_41E730)函数中的cameo.cameo.netstat_option参数包含一个堆栈溢出。
+cve-2022-4659||**拒绝 **不要使用这个候选号码。咨询IDs：无。原因是。该候选人未被其CNA使用。备注：无。
+CVE-2022-46590||TRENDnet TEW755AP 1.13B01被发现通过tools_netstat (sub_41E730)函数中的cameo.cameo.netstat_rsname参数包含一个堆栈溢出。
+CVE-2022-46591||TRENDnet TEW755AP 1.13B01被发现通过拒绝（sub_41BD60）函数中的reject_url参数包含堆栈溢出。
+CVE-2022-46592||TRENDnet TEW755AP 1.13B01被发现通过set_sta_enrollee_pin_5g函数中的wps_sta_enrollee_pin参数包含一个堆栈溢出。
+CVE-2022-46593||TRENDnet TEW755AP 1.13B01被发现在do_sta_enrollee_wifi函数中通过wps_sta_enrollee_pin参数包含堆栈溢出。
+CVE-2022-46594||TRENDnet TEW755AP 1.13B01被发现通过 auto_up_fw (sub_420A04) 函数中的 update_file_name 参数包含一个堆栈溢出。
+CVE-2022-46596||TRENDnet TEW755AP 1.13B01被发现通过icp_delete_img (sub_41DEDC)函数中的del_num参数包含堆栈溢出。
+CVE-2022-46597||TRENDnet TEW755AP 1.13B01被发现通过setup_wizard_mydlink (sub_4104B8)函数中的sys_service参数存在命令注入漏洞。
+CVE-2022-46598||TRENDnet TEW755AP 1.13B01被发现在动作set_sta_enrollee_pin_5g函数中通过wps_sta_enrollee_pin参数包含一个命令注入漏洞。
+CVE-2022-46599||TRENDnet TEW755AP 1.13B01被发现通过icp_setlogo_img (sub_41DBF4)函数中的setlogo_num参数包含堆栈溢出。
+CVE-2022-46600||TRENDnet TEW755AP 1.13B01被发现通过动作set_sta_enrollee_pin_24g函数中的wps_sta_enrollee_pin参数包含堆栈溢出。
+CVE-2022-46601||TRENDnet TEW755AP 1.13B01被发现通过icp_setbg_img (sub_41DD68)函数中的setbg_num参数包含堆栈溢出。
+CVE-2022-46603||Inkdrop v5.4.1中的一个问题允许攻击者通过上传精心制作的标记文件执行任意命令。
+CVE-2022-46609||Python3-RESTfulAPI提交的d9907f14e9e25dcdb54f5b22252b0e9452e3970e和e772e0beee284c50946e94c54a1d43071ca78b74被发现包含一个通过请求包的代码执行后门。该漏洞允许攻击者访问敏感的用户信息和数字货币密钥，以及升级权限。
+CVE-2022-46610||72crm v9被发现通过头像上传功能包含一个任意文件上传的漏洞。该漏洞允许攻击者通过制作的PHP文件执行任意代码。
+CVE-2022-4662||在Linux内核USB核心子系统的用户连接USB设备的方式中发现一个不正确的访问控制漏洞。本地用户可利用这一缺陷使系统崩溃。
+CVE-2022-46622||评判管理系统v1.0中存在跨站脚本（XSS）漏洞，允许攻击者通过注入firstname参数的精心制作的有效载荷执行任意网页脚本或HTML。
+CVE-2022-46623||Judging Management System v1.0.0被发现包含一个通过用户名参数的SQL注入漏洞。
+CVE-2022-4663||WordPress的会员导入插件在1.4.2之前（包括1.4.2）的版本中，由于输入消毒和输出转义不足，存在通过导入CSV文件中的user_login参数进行自我跨站脚本攻击的漏洞。这使得攻击者有可能在页面中注入任意网页脚本，如果他们能够成功地欺骗网站管理员上传带有恶意有效载荷的CSV文件，就可以执行。
+CVE-2022-46631||TOTOlink A7100RU V7.4cu.2313_B20191024被发现通过set/setWiFiSignalCfg函数中的wscDisabled参数包含一个命令注入漏洞。
+CVE-2022-46634||TOTOlink A7100RU V7.4cu.2313_B20191024被发现在set/setWiFiWpsCfg函数中通过wscDisabled参数包含一个命令注入漏洞。
+CVE-2022-46641||D-Link DIR-846 A1_FW100A43被发现在SetIpMacBindSettings函数中通过lan(0)_dhcps_staticlist参数包含一个命令注入漏洞。
+CVE-2022-46642||D-Link DIR-846 A1_FW100A43被发现在SetAutoUpgradeInfo函数中通过auto_upgrade_hour参数包含一个命令注入的漏洞。
+CVE-2022-4665||GitHub 仓库 ampache/ampache 在 5.5.6 之前不受限制地上传具有危险类型的文件。
+CVE-2022-46662||Roxio Creator LJB以未引用的文件路径启动另一个程序。由于注册的Windows服务路径包含空格且未加引号，如果恶意的可执行文件被放在某个路径上，该可执行文件可能会以Windows服务的权限被执行。受影响的产品和版本如下。Roxio Creator LJB版本号12.2 build number 106B62B、版本号12.2 build number 106B63A、版本号12.2 build number 106B69A、版本号12.2 build number 106B71A和版本号12.2 build number 106B74A)
+CVE-2022-46664||在Mendix Workflow Commons（所有版本< V2.4.0）、Mendix Workflow Commons V2.1（所有版本< V2.1.4）、Mendix Workflow Commons V2.3（所有版本< V2.3.2）中发现一个漏洞。受影响版本的模块不适当地处理某些模块实体的访问控制。这可能会允许认证的远程攻击者读取或删除敏感信息。
+cve-2022-46665||**拒绝 **不要使用这个候选号码。ConsultIDs: none.原因是。该候选人未被其CNA使用。备注：无。
+CVE-2022-46666||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46667|||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46668|||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46669|||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46670||罗克韦尔自动化公司被佐治亚理工学院的安全研究员告知一个漏洞，MicroLogix 1100和1400控制器包含一个漏洞，可能使攻击者有能力完成远程代码执行。该漏洞是嵌入式网络服务器中一个未经认证的存储跨站脚本漏洞。有效载荷通过SNMP传输到控制器，并在嵌入式网站的主页上呈现。
+cve-2022-46671||**拒绝 **不要使用这个候选号码。咨询IDs：无。原因是。该候选人未被其CNA使用。备注：无。
+CVE-2022-46672|||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46673||***拒绝 **不要使用这个候选号码。咨询IDs：无。理由是：该候选人未被其CNA使用。该候选人未被其CNA使用。注：无。
+CVE-2022-46682||Jenkins Plot Plugin 2.1.11及更早版本没有配置其XML解析器以防止XML外部实体（XXE）攻击。
+CVE-2022-46683||Jenkins Google Login Plugin 1.4到1.6（包括这两个版本）不正确地确定登录后的重定向URL合法地指向Jenkins。
+CVE-2022-46684||Jenkins Checkmarx Plugin 2022.3.3和更早的版本在插入HTML报告之前没有转义从Checkmarx服务API返回的值，导致存储的跨站脚本（XSS）漏洞。
+CVE-2022-46685||在Jenkins Gitea Plugin 1.4.4及更早版本中，Gitea个人访问令牌的实现不支持凭证屏蔽，可能通过构建日志暴露出来。
+CVE-2022-46686||Jenkins Custom Build Properties Plugin 2.79.vc095ccc85094和更早的版本在Custom Build Properties和Build Summary页面上没有转义属性值和构建显示名称，导致存储的跨站脚本(XSS)漏洞，能够设置或改变这些值的攻击者可以利用。
+CVE-2022-46687||Jenkins Spring Config Plugin 2.0.0 and earlier does not escape build display names shown on the Spring Config view, resulting in a stored cross-site scripting (XSS) vulnerability by attackers able to change build display names.
+CVE-2022-46688||Jenkins Sonar Gerrit Plugin 377.v8f3808963dc5及更早版本中存在跨站请求伪造（CSRF）漏洞，允许攻击者使用通过其他方法获得的攻击者指定的凭证ID让Jenkins连接到Gerrit服务器（之前由Jenkins管理员配置），可能捕获存储在Jenkins的凭证。
+CVE-2022-46689||一个竞赛条件已通过额外的验证得到解决。这个问题在tvOS 16.2、macOS Monterey 12.6.2、macOS Ventura 13.1、macOS Big Sur 11.7.2、iOS 15.7.2和iPadOS 15.7.2、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修正。一个应用程序可能能够以内核权限执行任意代码。
+CVE-2022-46690||一个越界写入问题已通过改进输入验证得到解决。这个问题在iOS 16.2和iPadOS 16.2、macOS Ventura 13.1、tvOS 16.2、watchOS 9.2中得到修复。一个应用程序可能能够以内核权限执行任意代码。
+CVE-2022-46691||一个内存消耗问题已通过改进内存处理得到解决。这个问题在Safari 16.2, tvOS 16.2, macOS Ventura 13.1, iOS 15.7.2和iPadOS 15.7.2, iOS 16.2和iPadOS 16.2, watchOS 9.2中得到修复。处理恶意制作的网页内容可能导致任意代码执行。
+CVE-2022-46692||一个逻辑问题已通过改进状态管理得到解决。这个问题在Safari 16.2、tvOS 16.2、iCloud for Windows 14.1、iOS 15.7.2和iPadOS 15.7.2、macOS Ventura 13.1、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修复。处理恶意制作的网页内容可能会绕过同源政策。
+CVE-2022-46693||一个越界写入问题已通过改进输入验证得到解决。这个问题在tvOS 16.2、iCloud for Windows 14.1、macOS Ventura 13.1、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修复。处理恶意制作的文件可能导致任意代码执行。
+CVE-2022-46694||一个越界写入问题已通过改进输入验证得到解决。这个问题在iOS 16.2和iPadOS 16.2、iOS 15.7.2和iPadOS 15.7.2、tvOS 16.2、watchOS 9.2中得到修复。解析恶意制作的视频文件可能导致内核代码执行。
+CVE-2022-46695||在处理URL时存在欺骗问题。该问题已通过改进输入验证得到解决。这个问题在tvOS 16.2、macOS Ventura 13.1、iOS 15.7.2和iPadOS 15.7.2、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修复。访问有恶意内容框架的网站可能导致UI欺骗。
+CVE-2022-46696||一个内存损坏问题已通过改进输入验证得到解决。这个问题在Safari 16.2, tvOS 16.2, macOS Ventura 13.1, iOS 16.2和iPadOS 16.2, watchOS 9.2中得到修复。处理恶意制作的网页内容可能导致任意代码执行。
+CVE-2022-46697||一个越界访问问题已通过改进的边界检查得到解决。这个问题在macOS Ventura 13.1中得到修复。一个应用程序可能能够以内核权限执行任意代码。
+CVE-2022-46698||通过改进检查解决了一个逻辑问题。这个问题在Safari 16.2、tvOS 16.2、iCloud for Windows 14.1、macOS Ventura 13.1、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修复。处理恶意制作的网页内容可能会泄露敏感的用户信息。
+CVE-2022-46699||通过改进状态管理解决了一个内存损坏问题。这个问题在Safari 16.2, tvOS 16.2, macOS Ventura 13.1, iOS 16.2和iPadOS 16.2, watchOS 9.2中得到修复。处理恶意制作的网页内容可能导致任意代码执行。
+CVE-2022-46700||一个内存损坏问题已通过改进输入验证得到解决。这个问题在Safari 16.2、tvOS 16.2、macOS Ventura 13.1、iOS 15.7.2和iPadOS 15.7.2、iOS 16.2和iPadOS 16.2、watchOS 9.2中得到修复。处理恶意制作的网页内容可能导致任意代码执行。
+CVE-2022-46701||该问题已通过改进边界检查得到解决。该问题已在iOS 16.2和iPadOS 16.2、macOS Ventura 13.1、tvOS 16.2中修复。连接到恶意的NFS服务器可能导致以内核权限执行任意代码。
+CVE-2022-46702||该问题已通过改进内存处理得到解决。该问题已在iOS16.2和iPadOS16.2中修复。一个应用程序可能会泄露内核内存。
+CVE-2022-46740||华为WS7100-20智能WiFi路由器的Wi-Fi模块中存在拒绝服务漏洞。成功利用该漏洞可能导致拒绝服务（DoS）条件。
+CVE-2022-46741||在PaddlePaddle 2.4之前的gather_tree中存在越界读取。
+CVE-2022-46742||PaddlePaddle 2.4.0-rc0中paddle.audio.functional.get_window的代码注入允许任意代码执行。
+CVE-2022-46761||系统存在漏洞，可能导致应用图标的动态隐藏和恢复。成功利用此漏洞可能导致应用图标的恶意隐藏。
+CVE-2022-46762||内存管理模块存在逻辑绕过漏洞。成功利用该漏洞可能会影响数据保密性。
+CVE-2022-46763||TrueConf Server 5.2.0.10225数据库存储函数中的SQL注入问题，允许低权限的数据库用户以数据库管理员的身份执行任意SQL命令，导致执行任意代码。
+CVE-2022-46764||TrueConf Server 5.2.0.10225的网络API存在SQL注入问题，允许远程未认证的攻击者执行任意SQL命令，最终导致远程代码执行。
+CVE-2022-46768||Zabbix网络服务报告生成中存在任意文件读取漏洞，该服务监听端口为10053。该服务在读取文件前没有对 URL 参数进行适当验证。
+CVE-2022-46769||Sling App CMS 1.1.2 版及之前的版本中存在不恰当的输入中和（"跨站脚本"）[CWE-79]漏洞，可能允许通过验证的远程攻击者在站点组功能中执行反射式跨站脚本（XSS）攻击。升级到Apache Sling App CMS >= 1.1.4
+CVE-2022-46770||qubes-mirage-firewall (aka Mirage firewall for QubesOS) 0.8.x到0.8.3允许客户操作系统用户通过制作的多播UDP数据包（IP地址范围为224.0.0.0到239.255.255）造成拒绝服务（CPU消耗和转发损失）。
+CVE-2022-46771||IBM UrbanCode Deploy (UCD) 6.2.0.0 至 6.2.7.18, 7.0.5.0 至 7.0.5.13, 7.1.0.0 至 7.1.2.9, 7.2.0.0 至 7.2.3.2 和 7.3.0.0 存在跨站脚本漏洞。该漏洞允许用户在Web UI中嵌入任意的JavaScript代码，从而改变预期的功能，可能导致可信会话中的凭证泄露。IBM X-Force ID：242273。
+CVE-2022-46792：Hasura GraphQL Engine 2.15.2之前的版本，在Postgres后端Update Many API中错误地处理了行级授权。修复的版本是2.10.2, 2.11.3, 2.12.1, 2.13.2, 2.14.1, 和2.15.2。(2.10.0之前的版本不受影响。)
+CVE-2022-46823||在Mendix SAML（Mendix 8兼容）（所有版本>= V2.3.0 < V2.3.4）、Mendix SAML（Mendix 9兼容，新轨道）（所有版本>= V3.3.0 < V3.3.9）、Mendix SAML（Mendix 9兼容，升级轨道）（所有版本>= V3.3.0 < V3.3.8）发现一个漏洞。受影响的模块容易受到反射式跨站脚本（XSS）攻击。这可能允许攻击者通过诱使用户访问恶意链接来提取敏感信息。
+CVE-2022-46824||在2022.2.4之前的JetBrains IntelliJ IDEA中，macOS上的fsnotifier守护程序可能存在缓冲区溢出。
+CVE-2022-46825||在2022.3之前的JetBrains IntelliJ IDEA中，内置网络服务器泄露了关于开放项目的信息。
+CVE-2022-46826||在2022.3之前的JetBrains IntelliJ IDEA中，内置网络服务器允许利用路径穿越漏洞读取任意文件。
+CVE-2022-46827||在2022.3之前的JetBrains IntelliJ IDEA中，可能存在通过请求自定义插件库而导致SSRF的XXE攻击。
+CVE-2022-46828||在2022.3之前的JetBrains IntelliJ IDEA中，在macOS上有可能发生DYLIB注入。
+CVE-2022-46829||在2022.3之前的JetBrains JetBrains Gateway中，如果主机同意，客户端可以在没有有效令牌的情况下连接。
+CVE-2022-4683||在0.9.0之前的GitHub仓库usememos/memos中，HTTPS会话中没有'安全'属性的敏感Cookie。
+CVE-2022-46830||在2022.10和2022.10.1之间的JetBrains TeamCity中，自定义STS端点允许内部端口扫描。
+CVE-2022-46831||在2022.10和2022.10.1之间的JetBrains TeamCity中，使用 "默认凭证提供者链 "连接到AWS，允许TeamCity项目管理员访问AWS资源，通常只限于TeamCity系统管理员。
+CVE-2022-46832||在SICK RFU62x固件版本<2.21中使用破损或有风险的加密算法，如果用户要求通过SSH接口使用弱的密码套件进行加密，低权限远程攻击者可以解密加密数据。固件更新的补丁和安装程序可向负责的SICK客户联系人索取。
+CVE-2022-46833在SICK RFU63x固件版本< v2.21中使用了一个破损或有风险的加密算法，如果用户要求通过SSH接口使用弱的密码套件进行加密，那么低权限的远程攻击者可以解密加密数据。固件更新的补丁和安装程序可向负责的SICK客户联系人索取。
+CVE-2022-46834||在SICK RFU65x固件版本< v2.21中使用破损或有风险的加密算法，如果用户要求通过SSH接口使用弱的密码套件进行加密，低权限的远程攻击者可以解密加密数据。固件更新的补丁和安装程序可向负责的SICK客户联系人索取。
+CVE-2022-4684||GitHub仓库usememos/memos在0.9.0之前的不当访问控制。
+CVE-2022-4685||**拒绝 **不要使用这个候选编号。原因是。这个CVE已经被拒绝，因为它被错误地分配了。所有的参考资料和描述都已被删除，以防止意外的使用。
+CVE-2022-4686||0.9.0之前的GitHub仓库usememos/memos的不当认证。
+CVE-2022-4687||0.9.0 以前的 GitHub 仓库 usememos/memos 中对特权 API 的不正确使用。
+CVE-2022-46870||Apache Zeppelin 中的一个不当中和网页生成过程中的输入（"跨站脚本"）漏洞允许登录用户在其他用户的浏览器中执行任意 javascript。这个问题影响到0.8.2之前的Apache Zeppelin。建议用户升级到Zeppelin的支持版本。
+CVE-2022-46871||一个过时的库（libusrsctp）包含可能被利用的漏洞。此漏洞影响到Firefox < 108。
+CVE-2022-46872||一个攻击者如果破坏了一个内容进程，可以通过剪贴板相关的IPC消息部分逃脱沙盒来读取任意文件。<br>*此漏洞只影响Linux的Thunderbird。其他操作系统不受影响。*.该漏洞影响到Firefox < 108, Firefox ESR < 102.6, 和Thunderbird < 102.6。
+由于火狐浏览器没有实现<code>unsafe-hashes</code> CSP指令，攻击者如果能够在受内容安全策略保护的页面中注入标记，就可以注入可执行脚本。这将受到该文件指定的内容安全策略的严格限制。此漏洞影响到Firefox < 108。
+CVE-2022-46874：一个长文件名的文件可能被截断以移除有效的扩展名，留下一个恶意的扩展名。这有可能导致用户混淆和执行恶意代码。<br/>*注*。这个问题最初包括在Thunderbird 102.6的公告中，但省略了一个补丁（专门针对Thunderbird），导致它实际上在Thunderbird 102.6.1中被修复。该漏洞影响到Firefox < 108、Thunderbird < 102.6.1、Thunderbird < 102.6和Firefox ESR < 102.6。
+CVE-2022-46875||当下载.atloc和.ftploc文件时，没有显示可执行文件警告，这些文件可以在用户的计算机上运行命令。<br>*注意：这个问题只影响Mac OS操作系统。其他操作系统不受影响。*。这个漏洞影响到Firefox < 108, Firefox ESR < 102.6, 和Thunderbird < 102.6。
+CVE-2022-46877||通过混淆浏览器，全屏通知可能被延迟或压制，导致潜在的用户混淆或欺骗攻击。该漏洞影响到 Firefox < 108。
+CVE-2022-46878||Mozilla开发人员Randell Jesup、Valentin Gosu、Olli Pettay和Mozilla Fuzzing Team报告了雷鸟102.5中存在的内存安全漏洞。其中一些漏洞显示了内存损坏的证据，我们推测，只要付出足够的努力，其中一些漏洞可以被利用来运行任意代码。该漏洞影响到Firefox < 108, Firefox ESR < 102.6, 和Thunderbird < 102.6。
+CVE-2022-46879||Mozilla开发人员和社区成员Lukas Bernhard、Gabriele Svelto、Randell Jesup和Mozilla Fuzzing Team报告了Firefox 107中存在的内存安全漏洞。其中一些漏洞显示了内存损坏的证据，我们推测，只要付出足够的努力，其中一些漏洞可以被利用来运行任意代码。该漏洞影响到Firefox < 108。
+CVE-2022-4688||0.9.0之前GitHub仓库usememos/memos中的不当授权。
+CVE-2022-46880||与tex单元相关的检查缺失，可能导致使用后免费和潜在可利用的崩溃。在我们更好地了解该问题的影响后，于2022年12月13日添加了该公告。该修复程序已包含在Firefox 105的原始版本中。该漏洞影响到Firefox ESR < 102.6，Firefox < 105，以及Thunderbird < 102.6。
+CVE-2022-46881||WebGL中的一个优化在某些情况下不正确，可能导致内存损坏和潜在的可利用崩溃。该漏洞影响 Firefox < 106、Firefox ESR < 102.6 和 Thunderbird < 102.6。
+CVE-2022-46882||WebGL扩展中的一个使用后的自由，可能导致潜在的可利用的崩溃。此漏洞影响Firefox < 107, Firefox ESR < 102.6, and Thunderbird < 102.6.
+CVE-2022-46883||Mozilla开发人员Gabriele Svelto、Yulia Startsev、Andrew McCreight和Mozilla Fuzzing Team报告了Firefox 106中存在的内存安全漏洞。其中一些漏洞显示了内存损坏的证据，我们推测，只要付出足够的努力，其中一些漏洞可以被利用来运行任意代码。本公告是在2022年12月13日发现它被无意中遗漏在原始公告中后添加的。该修复程序已包含在Firefox 107的原始版本中。该漏洞影响到Firefox < 107。
+CVE-2022-46885||Mozilla开发人员Timothy Nikkel、Ashley Hale和Mozilla Fuzzing团队报告了Firefox 105中存在的内存安全漏洞。其中一些漏洞显示了内存损坏的证据，我们推测，如果有足够的努力，其中一些漏洞可以被利用来运行任意代码。该漏洞影响到Firefox < 106。
+CVE-2022-4689||0.9.0之前的GitHub仓库usememos/memos的不当访问控制。
+CVE-2022-4690||跨站脚本（XSS） - 存储在0.9.0之前的GitHub仓库usememos/memos中。
+CVE-2022-46903||WebSoft HCM 2021.2.3.327中对用户输入的处理不充分，允许认证的攻击者在用户浏览器处理的页面中注入任意HTML标签，包括JavaScript编程语言的脚本，这导致了存储的XSS。
+CVE-2022-46904||WebSoft HCM 2021.2.3.327中对用户输入的处理不充分，允许认证的攻击者向用户浏览器处理的页面中注入任意HTML标签，包括JavaScript编程语言中的脚本，从而导致自XSS。
+CVE-2022-46905||WebSoft HCM 2021.2.3.327中对用户输入的处理不充分，允许未经认证的攻击者向用户浏览器处理的页面注入任意HTML标签，包括JavaScript编程语言中的脚本，从而导致反射XSS。
+CVE-2022-46906||WebSoft HCM 2021.2.3.327中对用户输入的处理不充分，允许身份验证的攻击者在用户浏览器处理的页面中注入任意HTML标签，包括JavaScript编程语言的脚本，从而导致反射式XSS。
+CVE-2022-46908||SQLite到3.40.0，当依赖-安全执行不受信任的CLI脚本时，没有正确实现azProhibitedFunctions保护机制，而是允许WRITEFILE等UDF函数。
+CVE-2022-4691||跨站脚本(XSS) - 存储在0.9.0之前的GitHub仓库usememos/memos。
+CVE-2022-46910||TP-Link TL-WA901ND V1至v3.11.2和TL-WA901N V2至v3.12.16的固件更新过程中的一个问题，允许攻击者通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-46912||TP-Link TL-WR841N / TL-WA841ND V7 3.13.9及之前的固件更新过程中的一个问题，允许攻击者通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-46914||TP-LINK TL-WA801N / TL-WA801ND V1 v3.12.16及更早版本的固件更新过程中的一个问题，允许攻击者通过上传精心制作的固件图像执行任意代码或导致拒绝服务（DoS）。
+CVE-2022-4692||跨站脚本（XSS）--存储在0.9.0之前的GitHub存储库usememos/memos。
+CVE-2022-4694||跨站脚本（XSS）--存储在0.9.0之前的GitHub仓库usememos/memos中。
+CVE-2022-46946||Helmet Store Showroom Site v1.0被发现通过/classes/Master.php?f=delete_brand的id参数存在SQL注入漏洞。
+CVE-2022-46947||Helmet Store Showroom Site v1.0被发现通过/classes/Master.php?f=delete_category的id参数存在SQL注入漏洞。
+CVE-2022-46949||Helmet Store Showroom Site v1.0被发现通过/classes/Master.php?f=delete_helmet的id参数存在SQL注入漏洞。
+CVE-2022-4695||跨站脚本(XSS) - 存储在0.9.0之前的GitHub仓库usememos/memos。
+CVE-2022-46950||Dynamic Transaction Queuing System v1.0被发现通过/admin/ajax.php?action=delete_window的id参数包含一个SQL注入漏洞。
+CVE-2022-46951||Dynamic Transaction Queuing System v1.0被发现在/admin/ajax.php?action=delete_uploads的id参数处包含一个SQL注入的漏洞。
+CVE-2022-46952||Dynamic Transaction Queuing System v1.0被发现在/admin/ajax.php?action=delete_user处通过id参数包含一个SQL注入漏洞。
+CVE-2022-46953||Dynamic Transaction Queuing System v1.0被发现在/admin/ajax.php?action=save_window的id参数中包含一个SQL注入漏洞。
+CVE-2022-46954||Dynamic Transaction Queuing System v1.0被发现在/admin/ajax.php?action=delete_transaction的id参数处包含一个SQL注入的漏洞。
+CVE-2022-46955||Dynamic Transaction Queuing System v1.0被发现在/admin/ajax.php?action=save_queue处通过id参数包含一个SQL注入漏洞。
+CVE-2022-46956||Dynamic Transaction Queuing System v1.0被发现在/admin/manage_user.php包含一个通过id参数的SQL注入漏洞。
+CVE-2022-4696||Linux内核中存在一个通过io_uring和IORING_OP_SPLICE操作的 "使用后自由 "漏洞。如果IORING_OP_SPLICE缺少IO_WQ_WORK_FILES标志，这表明该操作不会使用current->nsproxy，所以其引用计数器不会增加。这个假设并不总是正确的，因为在特定的文件上调用io_splice会调用get_uts函数，该函数会使用current->nsproxy，导致以后无效地减少它的参考计数器，从而造成use-after free漏洞。我们建议升级到5.10.160或以上版本。
+CVE-2022-4697||WordPress的ProfilePress插件在4.5.0以下（包括4.5.0）的版本中，由于输入消毒和输出转义不足，存在通过 "wp_user_cover_default_image_url "参数进行存储跨站脚本的漏洞。这使得拥有管理员级别及以上权限的认证攻击者有可能在页面中注入任意网页脚本，只要用户访问注入的页面就会执行。这只影响到多站点安装和已禁用 unfiltered_html 的安装。
+CVE-2022-4698||WordPress的ProfilePress插件在4.5.0以下版本（包括4.5.0）中，由于输入消毒和输出转义不足，存在通过几个表单字段进行存储跨站脚本的风险。这使得拥有管理员级别及以上权限的认证攻击者有可能在页面中注入任意网页脚本，只要用户访问注入的页面就会执行。这只影响到多站点安装和已禁用unfiltered_html的安装。
+CVE-2022-46996||vSphere_selfuse commit 2a9fe074a64f6a0dd8ac02f21e2f10d66cac5749被发现包含一个通过请求包执行代码的后门。该漏洞允许攻击者访问敏感的用户信息和数字货币密钥，以及升级权限。
+CVE-2022-46997||Passhunt commit 54eb987d30ead2b8ebbf1f0b880aa14249323867被发现包含一个通过请求包执行代码的后门。该漏洞允许攻击者访问敏感的用户信息和数字货币密钥，以及升级权限。
+CVE-2022-4700||WordPress的Royal Elementor Addons插件在1.3.59之前（包括1.3.59）的版本中，"wpr_activate_required_theme "AJAX动作存在访问控制不足的问题。这允许任何经过认证的用户，包括那些具有订阅者级别权限的用户，激活 "royal-elementor-kit "主题。如果没有安装这样的主题，这样做也会影响网站的可用性，因为网站会尝试加载一个不存在的主题。
+CVE-2022-4701||WordPress的Royal Elementor Addons插件在1.3.59以下版本的'wpr_activate_required_plugins'AJAX动作中存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，激活 "contact-form-7"、"media-library-assistant "或 "woocommerce "插件，如果它们被安装在网站上的话。
+CVE-2022-4702||WordPress的Royal Elementor Addons插件在1.3.59（含）以下版本的'wpr_fix_royal_compatibility'AJAX动作中，存在访问控制不足的问题。这允许任何认证的用户，包括那些拥有订阅者级别权限的用户，停用网站上的每一个插件，除非它是一个极其有限的硬编码选择的一部分。这也会将网站切换到'royal-elementor-kit'主题，可能会导致可用性问题。
+CVE-2022-4703||WordPress的Royal Elementor Addons插件在1.3.59以下版本的'wpr_reset_previous_import'AJAX动作中存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，重置之前导入的数据。
+CVE-2022-4704||WordPress的Royal Elementor Addons插件在1.3.59及以下版本的'wpr_import_templates_kit'AJAX动作中，存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，导入预设的网站配置模板，包括图像和设置。
+CVE-2022-4705||WordPress的Royal Elementor Addons插件在1.3.59（含）以下版本的'wpr_final_settings_setup'AJAX动作中存在访问控制不足的问题。这允许任何经过验证的用户，包括那些拥有订阅者级别权限的用户，最终激活预设的网站配置模板，这些模板可以通过CVE-2022-4704中记录的单独动作选择和导入。
+CVE-2022-4707||WordPress的Royal Elementor Addons插件在1.3.59以下版本（包括1.3.59）存在跨站请求伪造的漏洞。这是由于 "wpr_create_mega_menu_template "AJAX函数中缺少nonce验证。这使得未经认证的攻击者可以创建Mega菜单模板，授予他们可以欺骗管理员执行一个动作，如点击一个链接。
+CVE-2022-4708||WordPress的Royal Elementor Addons插件在1.3.59（含）以下版本的'wpr_save_template_conditions'AJAX动作中，存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，修改显示模板的条件。
+CVE-2022-47083||Spitfire CMS 1.0.475存在PHP对象注入的漏洞。
+CVE-2022-47086||GPAC MP4Box v2.1-DEV-rev574-g9d5bb184b通过scene_manager/swf_parse.c中的函数gf_sm_load_init_swf包含一个分段违规。
+CVE-2022-47087||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b在media_tools/av_parsers.c的gf_vvc_read_pps_bs_internal函数中存在缓冲器溢出。
+CVE-2022-47088||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b存在缓冲区溢出漏洞。
+CVE-2022-47089||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b 容易受到 media_tools/av_parsers.c 的 gf_vvc_read_sps_bs_internal 函数的缓冲区溢出。
+CVE-2022-4709||WordPress 的 Royal Elementor Addons 插件在 1.3.59 及以下版本中的 "wpr_import_library_template "AJAX 操作中存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，从该插件的模板库中导入和激活模板。
+CVE-2022-47091||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b 在 filters/load_text.c 的 gf_text_process_sub 函数中存在缓冲区溢出的漏洞。
+CVE-2022-47092||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b在media_tools/av_parsers.c:8316的gf_hevc_read_sps_bs_internal函数中包含一个整数溢出漏洞。
+CVE-2022-47093||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b 在 m2tsdmx_declare_pid 的 filters/dmx_m2ts.c:470 中存在堆使用后自由的问题。
+CVE-2022-47094||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b 在 m2tsdmx_declare_pid 中通过 filters/dmx_m2ts.c:343 易受空指针解除定义的影响。
+CVE-2022-47095||GPAC MP4box 2.1-DEV-rev574-g9d5bb184b在media_tools/av_parsers.c的hevc_parse_vps_extension函数中存在缓冲区溢出。
+CVE-2022-4710||WordPress的Royal Elementor Addons插件在1.3.59以下（包括1.3.59）的版本中，由于'data_fetch'函数中的'wpr_ajax_search_link_target'参数的输入消毒和输出转义不足，容易出现反射式跨站脚本。这使得未经认证的攻击者有可能在页面中注入任意网页脚本，如果他们能够成功地欺骗用户执行一个动作，如点击一个链接，就可以执行。发生这种情况是因为'sanitize_text_field'不足以防止基于属性的跨站脚本攻击。
+CVE-2022-47102||学生学习中心管理系统V 1.0中的一个跨站脚本（XSS）漏洞允许攻击者通过注入姓名参数的精心制作的有效载荷执行任意网页脚本或HTML。
+CVE-2022-4711||WordPress的Royal Elementor Addons插件在1.3.59（含）以下版本的 "wpr_save_mega_menu_settings "AJAX动作中存在访问控制不足的问题。这允许任何有身份的用户，包括有订阅者级别权限的用户，启用和修改任何菜单项的巨型菜单设置。
+CVE-2022-47115||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepauth参数包含堆栈溢出。
+CVE-2022-47116||天达A15 V15.13.07.13被发现通过/goform/SysToolChangePwd的SYSPS参数包含堆栈溢出。
+CVE-2022-47117||天达A15 V15.13.07.13被发现通过/goform/WifiBasicSet的安全参数包含堆栈溢出。
+CVE-2022-47118||天达A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepkey1参数包含堆栈溢出。
+CVE-2022-47119||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的ssid参数包含堆栈溢出。
+CVE-2022-47120||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的security_5g参数包含堆栈溢出。
+CVE-2022-47121||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepkey参数包含堆栈溢出。
+CVE-2022-47122||Tenda A15 V15.13.07.13被发现在/goform/WifiBasicSet的wrlPwd_5g参数中包含堆栈溢出。
+CVE-2022-47123||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepkey3参数包含堆栈溢出。
+CVE-2022-47124||天达A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepkey4参数包含堆栈溢出。
+CVE-2022-47125||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wrlEn_5g参数包含一个堆栈溢出。
+CVE-2022-47126||Tenda A15 V15.13.07.13被发现在/goform/WifiBasicSet包含一个通过wrlEn参数的堆栈溢出。
+CVE-2022-47127||Tenda A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wrlPwd参数包含一个堆栈溢出。
+CVE-2022-47128||天达A15 V15.13.07.13被发现通过/goform/WifiBasicSet的wepkey2参数包含一个堆栈溢出。
+CVE-2022-4719||GitHub软件库ikus060/rdiffweb在2.5.5之前的业务逻辑错误。
+CVE-2022-4720||2.5.5之前的GitHub仓库ikus060/rdiffweb中的开放重定向。
+CVE-2022-47208||默认运行的 "puhttpsniff "服务，由于没有对用户输入进行适当处理，容易导致命令注入。与路由器在同一网段的未经认证的攻击者可以在设备上执行任意命令而无需认证。
+CVE-2022-47209||设备上存在一个支持用户，似乎是技术支持人员的一个后门。该账户的默认密码为 "support"，用户无法通过任何正常访问的方式进行更改。
+CVE-2022-4721||在GitHub仓库ikus060/rdiffweb 2.5.5之前，未能将特殊元素消毒到不同平面（特殊元素注入）。
+CVE-2022-47210||通过telnet呈现给用户的默认控制台（启用时）被限制为一个命令子集。然而，在这个控制台发出的命令似乎被直接送入系统调用或其他类似的功能。这允许任何认证的用户在设备上执行任意命令。
+CVE-2022-47211||Microsoft Office Graphics远程代码执行漏洞。该CVE ID与CVE-2022-26804、CVE-2022-26805、CVE-2022-26806、CVE-2022-44692、CVE-2022-47212、CVE-2022-47213是唯一的。
+CVE-2022-47212||Microsoft Office Graphics远程代码执行漏洞。该CVE ID与CVE-2022-26804, CVE-2022-26805, CVE-2022-26806, CVE-2022-44692, CVE-2022-47211, CVE-2022-47213是唯一的。
+CVE-2022-47213||Microsoft Office Graphics远程代码执行漏洞。该CVE ID与CVE-2022-26804, CVE-2022-26805, CVE-2022-26806, CVE-2022-44692, CVE-2022-47211, CVE-2022-47212是唯一的。
+CVE-2022-4722||在2.5.5之前的GitHub存储库ikus060/rdiffweb中通过主要弱点绕过认证。
+CVE-2022-4723||在2.5.5之前的GitHub仓库ikus060/rdiffweb中，无限制或节制地分配资源。
+CVE-2022-4724||2.5.5之前的GitHub仓库ikus060/rdiffweb中不适当的访问控制。
+CVE-2022-4725||在AWS SDK 2.59.0中发现一个漏洞。它已被评为关键。该问题影响到XML解析器组件的文件aws-android-sdk-core/src/main/java/com/amazonaws/util/XpathUtils.java中的功能XpathUtils。该操作会导致服务器端的请求伪造。升级到2.59.1版本能够解决这个问题。该补丁的名称是c3e6d69422e1f0c80fe53f2d757b8df97619af2b。建议升级受影响的组件。识别码VDB-216737被分配给该漏洞。
+CVE-2022-4726||在SourceCodester Sanitization Management System 1.0中发现一个归类为关键的漏洞。受此漏洞影响的是组件Admin Login的一个未知功能。对用户名/密码参数的操作导致了sql注入。该攻击可以远程启动。该漏洞的相关标识符为VDB-216739。
+CVE-2022-4727 在 OpenMRS Appointment Scheduling Module 1.16.x 中发现一个漏洞，该漏洞被归类为有问题的漏洞。对参数notes的操作会导致跨网站脚本攻击。有可能从远程发起攻击。升级到1.17.0版本能够解决这个问题。该补丁的名称是2ccbe39c020809765de41eeb8ee4c70b5ec49cc8。建议升级受影响的组件。识别码VDB-216741被分配给该漏洞。
+CVE-2022-4728||在Graphite Web中发现一个漏洞，并将其归类为有问题的漏洞。该漏洞影响到组件 Cookie Handler 的未知代码。篡改导致跨网站脚本攻击。攻击可以从远程启动。该漏洞已向公众披露，可以使用。该补丁的名称是2f178f490e10efc03cd1d27c72f64ecab224eb23。建议应用一个补丁来修复这个问题。VDB-216742是分配给该漏洞的标识符。
+CVE-2022-4729||在Graphite Web中发现一个漏洞，并被归类为有问题。该问题影响到组件模板名称处理程序的一些未知处理。该操作会导致跨网站脚本攻击。该攻击可能是远程启动的。该漏洞已向公众披露，并可能被使用。该补丁的名称是2f178f490e10efc03cd1d27c72f64ecab224eb23。建议应用补丁来修复这个问题。该漏洞的相关标识符为VDB-216743。
+CVE-2022-4730||在Graphite Web中发现一个漏洞。它已被归类为有问题的。受影响的是组件绝对时间范围处理程序的一个未知功能。该操作导致跨网站脚本攻击。有可能远程发起攻击。该漏洞已被披露给公众，并可能被使用。该补丁的名称是2f178f490e10efc03cd1d27c72f64ecab224eb23。建议应用补丁来修复这个问题。该漏洞的标识符为VDB-216744。
+CVE-2022-4731在myapnea的29.0.x版本中发现一个漏洞，该漏洞被列为问题。该操作会导致跨网站脚本攻击。有可能远程发起攻击。升级到29.1.0版本能够解决这个问题。该补丁的名称是99934258530d761bd5d09809bfa6c14b598f8d18。建议升级受影响的组件。VDB-216750是分配给该漏洞的标识符。
+CVE-2022-47317||V-Server v4.0.12.0及更早版本中的越界写入漏洞，允许本地攻击者通过让用户打开特制的项目文件，获取信息和/或执行任意代码。
+CVE-2022-4732||在1.3.2之前的GitHub存储库microweber/microweber中不受限制地上传危险类型的文件。
+CVE-2022-4733||跨站脚本（XSS）--存储在7.0.0.2之前的GitHub仓库openemr/openemr中。
+CVE-2022-4734||敏感信息暴露于0.9.1之前的GitHub仓库usememos/memos中的未经授权的行为者。
+CVE-2022-4735||在asrashley dash-live中发现一个归类为问题的漏洞。该漏洞影响了组件DOM Node Handler的static/js/media.js文件的功能准备。该操作会导致跨网站脚本攻击。该攻击可以远程启动。该补丁的名称是24d01757a5319cc14c4aa1d8b53d1ab24d48e451。建议应用一个补丁来修复这个问题。VDB-216766是分配给这个漏洞的标识符。
+CVE-2022-4736||在Venganzas del Pasado发现一个漏洞，并将其列为问题。受此问题影响的是一些未知功能。对参数the_title的操作导致了跨网站脚本攻击。该攻击可能会被远程启动。该补丁的名称是62339b2ec445692c710b804bdf07aef4bd247ff7。建议应用一个补丁来修复这个问题。VDB-216770是分配给这个漏洞的标识符。
+CVE-2022-4737||SourceCodester Blood Bank Management System 1.0中发现一个漏洞。它已被评为关键。该问题影响到login.php文件的一些未知处理。对参数username/password的操作导致了sql注入。该攻击可能是远程启动的。识别码VDB-216773被分配给这个漏洞。
+CVE-2022-47377||固件版本<1.13.4的SICK SIM2000ST Partnumber 2086502的密码恢复漏洞，允许无权的远程攻击者通过调用密码恢复机制方法获得对定义为RecoverableUserLevel的用户级别的访问。这导致他们在系统上的权限增加，从而影响系统的保密性、完整性和可用性。攻击者可以通过利用该漏洞期待重复的成功。建议的解决方案是尽快将固件更新到>=1.13.4的版本（可在SICK支持门户中找到）。
+CVE-2022-4738在SourceCodester Blood Bank Management System 1.0中发现一个被列为有问题的漏洞。受影响的是用户注册处理程序组件的index.php?page=users文件的一个未知功能。对参数Name的操作导致了跨网站脚本攻击。有可能远程发起攻击。VDB-216774是分配给该漏洞的标识符。
+CVE-2022-4739||SourceCodester学校宿舍管理系统1.0中发现一个被列为关键的漏洞。受此漏洞影响的是组件Admin Login的一个未知功能。该操作会导致sql注入。该攻击可以远程启动。该漏洞的相关标识符为VDB-216775。
+CVE-2022-4740||在kkFileView中发现一个漏洞，该漏洞被归类为有问题。受该问题影响的是文件/picturesPreview的函数setWatermarkAttribute。该操作会导致跨网站脚本攻击。该攻击可能会被远程启动。该漏洞已向公众披露，可供使用。该漏洞的标识符为VDB-216776。
+CVE-2022-47406||在TYPO3的fe_change_pwd（又名Change password for frontend users）扩展2.0.5之前和3.x之前发现一个问题。当密码被更改时，该扩展无法撤销当前用户的现有会话。
+CVE-2022-47407||在TYPO3的fp_masterquiz（又名Master-Quiz）扩展（2.2.1之前）和3.x（3.5.1之前）发现一个问题。攻击者可以继续一个不同用户的测验。这样做，攻击者可以查看该用户的答案并修改这些答案。
+CVE-2022-47408||在TYPO3的1.1.1、1.2.0、2.1.2、2.2.1至2.4.0和3.2.6之前的fp_newsletter（又称通讯订阅者管理）扩展中发现一个问题。有一个CAPTCHA绕过，可以导致订阅很多人。
+CVE-2022-47409||在TYPO3的1.1.1、1.2.0、2.1.2、2.2.1至2.4.0和3.2.6之前的3.x的fp_newsletter（又称通讯订阅者管理）扩展中发现一个问题。攻击者可以在deleteAction操作中通过一系列修改的订阅UID来取消所有人的订阅。
+CVE-2022-4741||docconv在1.2.0之前发现一个漏洞，并被列为有问题的漏洞。该问题影响到ConvertDocx/ConvertODT/ConvertPages/ConvertXML/XMLToText函数。该操作导致了不受控制的内存分配。该攻击可能是远程启动的。升级到1.2.1版本能够解决这个问题。该补丁的名称是42bcff666855ab978e67a9041d0cdea552f20301。建议升级受影响的组件。该漏洞的相关标识符为VDB-216779。
+CVE-2022-47410||在TYPO3的1.1.1、1.2.0、2.1.2、2.2.1至2.4.0、3.2.6之前的fp_newsletter（又称通讯订阅者管理）扩展中发现一个问题。关于订阅者的数据可以通过createAction操作获得。
+CVE-2022-47411||在TYPO3的1.1.1、1.2.0、2.1.2、2.2.1至2.4.0和3.2.6之前的3.x扩展的fp_newsletter（又称通讯订阅者管理）中发现一个问题。关于订阅者的数据可以通过取消订阅行动操作获得。
+CVE-2022-4742||在json-pointer中发现一个漏洞，该漏洞被列为关键漏洞。受此问题影响的是文件index.js的函数集。该操作导致对象原型属性的不适当控制修改（"原型污染"）。该攻击可能被远程启动。该补丁的名称是859c9984b6c407fc2d5a0a7e47c7274daa681941。建议应用一个补丁来修复这个问题。VDB-216794是分配给该漏洞的标识符。
+CVE-2022-4743||SDL_render_gles.c 中的 GLES_CreateTexture()函数中发现了一个潜在的内存泄漏问题，该漏洞允许攻击者造成拒绝服务攻击。该漏洞影响到 SDL2 v2.0.4 及以上版本。SDL-1.x 不受影响。
+CVE-2022-4748||在 FlatPress 中发现一个漏洞。它已被归类为关键。这影响了文件删除处理程序组件的文件fp-plugins/mediamanager/panels/panel.mediamanager.file.php中的doItemActions函数。对参数deletefile的操作导致了路径遍历。该补丁的名称是5d5c7f6d8f072d14926fc2c3a97cdd763802f170。建议应用一个补丁来修复这个问题。识别码VDB-216861被分配给这个漏洞。
+CVE-2022-47500||URL Redirection to Untrusted Site ('Open Redirect') vulnerability in Apache Software Foundation Apache Helix UI component.This issue affects Apache Helix all releases from 0.8.0 to 1.0.4。解决方法：删除前向组件，因为它是为UI嵌入而设计的不恰当。用户请升级到1.1.0来解决这个问题。
+CVE-2022-47512||敏感信息以纯文本形式存储在HCO/SolarWinds Platform 2022.4的一个文件中，该文件可被拥有本地账户的用户访问。没有其他版本受到影响
+CVE-2022-47514||2.5.0之前的XML-RPC.NET中的XML外部实体（XXE）注入漏洞允许远程认证用户进行服务器端请求伪造（SSRF）攻击，如pingback.aspx POST请求所显示。
+CVE-2022-47515||在0.8.20之前的drachtio-server发现一个问题。它允许远程攻击者通过TCP请求中的长信息导致std::length_error，从而造成拒绝服务（守护进程崩溃）。
+CVE-2022-47516||在0.8.20之前的drachtio-server的libsofia-sip分叉中发现一个问题。它允许远程攻击者通过制作的UDP消息导致libsofia-sip-ua/tport/tport.c自我断言失败，从而导致拒绝服务（守护进程崩溃）。
+CVE-2022-47517||在0.8.19之前的drachtio-server的libsofia-sip分叉中发现一个问题。该问题允许远程攻击者通过精心制作的UDP消息导致url_canonize2基于堆的缓冲区超读（因为存在逐一错误），从而导致拒绝服务（守护进程崩溃）。
+CVE-2022-47518||在6.0.11之前的Linux内核中发现一个问题。在WILC1000无线驱动程序中，drivers/net/wireless/microchip/wilc1000/cfg80211.c中缺少对通道数量的验证，当从Wi-Fi管理帧中复制操作通道列表时，可能引发基于堆的缓冲区溢出。
+CVE-2022-47519||在6.0.11之前的Linux内核中发现一个问题。在WILC1000无线驱动中的drivers/net/wireless/microchip/wilc1000/cfg80211.c中缺少对IEEE80211_P2P_ATTR_OPER_CHANNEL的验证，在解析Wi-Fi管理帧中的频道列表属性时，可能会触发越界写入。
+CVE-2022-47520||在6.0.11之前的Linux内核中发现一个问题。WILC1000 无线驱动程序中的 drivers/net/wireless/microchip/wilc1000/hif.c 中缺少偏移量验证，在解析 Netlink 数据包中的 Robust Security Network (RSN) 信息元素时，会触发越界读取。
+CVE-2022-47521||在6.0.11之前的Linux内核中发现一个问题。在WILC1000无线驱动中的drivers/net/wireless/microchip/wilc1000/cfg80211.c中缺少对IEEE80211_P2P_ATTR_CHANNEL_LIST的验证，在解析Wi-Fi管理帧中的操作频道属性时，可触发基于堆的缓冲区溢出。
+CVE-2022-47523||Zoho ManageEngine Access Manager Plus before 4309, Password Manager Pro before 12210, and PAM360 before 5801存在SQL注入漏洞。
+CVE-2022-47524||F-Secure SAFE Browser 19.1 before 19.2 for Android允许IDN同位素攻击。
+CVE-2022-47543||在Siren Investigate 12.1.7之前发现一个问题。在全局对象上存在ACL绕过。
+CVE-2022-47544||在12.1.7之前的Siren Investigate中发现一个问题。脚本变量白名单的沙盒化程度不够。
+CVE-2022-47547||GossipSub 1.1，如用于Ethereum 2.0，允许对等体保持积极的分数（从而不被从网络中剪除），即使它通过从未转发主题消息而持续不当行为。
+CVE-2022-47549||3.20之前的TrustedFirmware Open Portable Trusted Execution Environment (OP-TEE)中optee_os的一个未受保护的内存访问操作允许物理上接近的对手绕过签名验证并通过电磁故障注入安装恶意的可信应用程序。
+CVE-2022-4755||在FlatPress中发现一个漏洞，并将其归类为有问题。该问题影响到媒体管理器插件组件的文件fp-plugins/mediamanager/panels/panel.mediamanager.file.php中的函数main。对参数mm-newgallery-name的操作导致了跨网站脚本攻击。该攻击可能是远程启动的。补丁名称为d3f329496536dc99f9707f2f295d571d65a496f5。 建议应用补丁来修复这个问题。识别码VDB-216869被分配给这个漏洞。
+CVE-2022-47551||Apiman 1.5.7至2.2.3.Final对Apiman Manager REST API内的读取权限检查不足。该问题的根本原因是Apiman项目意外地接受了一个大型的贡献，该贡献与3.0.0.Final之前的Apiman版本的安全模型不完全兼容。正因为如此，3.0.0.Final不受该漏洞的影响。
+CVE-2022-47577||** DISPUTED **在Zoho ManageEngine Device Control Plus 10.1.2228.15的端点保护代理中发现一个问题。尽管配置了对USB移动硬盘、USB硬盘设备、存储卡、移动设备的USB连接等的完全限制，但仍有可能通过利用虚拟机（VM）绕过USB限制。这允许文件在笔记本电脑/系统之外进行交换。虚拟机可以由任何用户创建（甚至没有管理权限）。数据渗出可以在主机上的Windows事件的审计跟踪中没有任何记录。注意：供应商的立场是 "这不是我们产品中的漏洞"。
+CVE-2022-47578||**** DISPUTED **在Zoho ManageEngine Device Control Plus 10.1.2228.15的端点保护代理中发现一个问题。尽管对USB移动硬盘、USB硬盘设备、存储卡、移动设备的USB连接等配置了完整的限制，但仍有可能通过启动到安全模式绕过USB限制。这允许在笔记本电脑/系统之外交换文件。安全模式可以由任何用户启动（甚至没有管理权限）。数据外流可能发生，而且恶意软件也可能被引入到系统中。注意：供应商的立场是 "这不是我们产品中的一个漏洞"。
+CVE-2022-47581：Isode M-Vault 16.0v0至17.x（17.0v24之前）在发出LDAP v1绑定请求时可能崩溃。
+CVE-2022-47618||Merit LILIN AH55B04 & AH55B08 DVR公司有硬编码的管理员凭证。未经认证的远程攻击者可以使用这些凭证登录管理员页面，操纵系统或破坏服务。
+CVE-2022-47629||1.6.3之前的Libksba容易在CRL签名解析器中出现整数溢出漏洞。
+CVE-2022-47633||Kyverno 1.8.3和1.8.4中的图像签名验证绕过漏洞允许恶意图像注册机构（或中间人攻击者）向受保护的Kubernetes集群注入无签名的任意容器图像。这在1.8.5中得到了修复。这在1.8.5中已被修复，受影响的版本有缓解措施。
+CVE-2022-47634||Isode M-Link R16.2v1至R17.0之前的R17.0v24中的M-Link Archive Server允许非管理员用户通过某些HTTP端点访问和操纵存档数据，又称LINK-2867。
+CVE-2022-47635||Wildix WMS 6 before 6.02.20221216, WMS 5 before 5.04.20221214, and WMS4 before 4.04.45396.23 允许通过 ZohoClient.php 进行服务器端请求伪造（SSRF）。
+CVE-2022-47653||GPAC MP4box 2.1-DEV-rev593-g007bf61a0在media_tools/av_parsers.c:9113的eac3_update_channels函数中存在缓冲区溢出漏洞。
+CVE-2022-47654||GPAC MP4box 2.1-DEV-rev593-g007bf61a0在media_tools/av_parsers.c:8261的gf_hevc_read_sps_bs_internal函数中容易发生缓冲区溢出。
+CVE-2022-47655||Libde265 1.0.9在函数void put_qpel_fallback<unsigned short>中存在缓冲区溢出漏洞。
+CVE-2022-47656||GPAC MP4box 2.1-DEV-rev617-g85ce76efd 在 media_tools/av_parsers.c:8273 的 gf_hevc_read_sps_bs_internal 函数存在缓冲区溢出漏洞。
+CVE-2022-47657||GPAC MP4Box 2.1-DEV-rev644-g5c4df2a67在media_tools/av_parsers.c:7662的函数hevc_parse_vps_extension中存在缓冲区溢出漏洞。
+CVE-2022-47658||GPAC MP4Box 2.1-DEV-rev644-g5c4df2a67在media_tools/av_parsers.c:8039的函数gf_hevc_read_vps_bs_internal中存在缓冲区溢出漏洞。
+CVE-2022-47659||GPAC MP4box 2.1-DEV-rev644-g5c4df2a67在gf_bs_read_data中存在缓冲区溢出漏洞。
+CVE-2022-4766|||在4.5.5之前的dolibarr_project_timesheet中发现了一个漏洞。它已被宣布为有问题。该漏洞影响到组件Form Handler的未知代码。该操作导致跨站请求伪造。该攻击可以远程启动。升级到4.5.6.a版本能够解决这个问题。该补丁的名称是082282e9dab43963e6c8f03cfaddd7921de377f4。建议升级受影响的组件。该漏洞的标识符为VDB-216880。
+CVE-2022-47660||GPAC MP4Box 2.1-DEV-rev644-g5c4df2a67在isomedia/isom_write.c中有整数溢出。
+CVE-2022-47661||GPAC MP4Box 2.1-DEV-rev649-ga8f438d20在gf_media_nalu_add_emulation_bytes中，通过media_tools/av_parsers.c:4988存在缓冲区溢出漏洞。
+CVE-2022-47662||GPAC MP4Box 2.1-DEV-rev649-ga8f438d20在Media_GetSample isomedia/media.c:662中因无限递归而产生段错误（/堆栈溢出）。
+CVE-2022-47663||GPAC MP4box 2.1-DEV-rev649-ga8f438d20在h263dmx_process filters/reframe_h263.c:609中存在缓冲区溢出问题。
+CVE-2022-4767||在0.9.1之前的GitHub仓库usememos/memos存在拒绝服务。
+CVE-2022-4768||在Dropbox merou中发现一个漏洞。它已被归类为关键。受影响的是SSH公钥处理程序组件grouper/public_key.py文件中的函数add_public_key。对参数public_key_str的操作导致了注入。有可能在远程发起攻击。该补丁的名称是d93087973afa26bc0a2d0a5eb5c0fde748bdd107。建议应用一个补丁来修复这个问题。VDB-216906是分配给该漏洞的标识符。
+CVE-2022-4772||在Widoco中发现一个漏洞，并将其列为关键。受此问题影响的是文件 src/main/java/widoco/WidocoUtils.java 中的函数 unZipIt。该操作导致了路径遍历。有可能在本地主机上发起攻击。该补丁的名称是f2279b76827f32190adfa9bd5229b7d5a147fa92。建议应用一个补丁来修复这个问题。VDB-216914是分配给该漏洞的标识符。
+CVE-2022-4773||**分配时不支持 **** 分配时不支持 **在cloudsync中发现一个被列为有问题的漏洞。受此漏洞影响的是 src/main/java/cloudsync/connector/LocalFilesystemConnector.java 文件中的 getItem 函数。该操作会导致路径遍历。有可能在本地主机上发起攻击。该补丁的名称是3ad796833398af257c28e0ebeade68518e0e612a。建议应用补丁来修复这个问题。该漏洞的相关标识符为VDB-216919。注意：该漏洞只影响到维护者不再支持的产品。
+CVE-2022-4778||StreamX应用程序从6.02.01到6.04.34版本受到路径遍历漏洞的影响，该漏洞允许认证用户未经授权访问服务器文件系统上的文件。使用StreamView HTML组件并激活公共网络服务器功能的StreamX应用程序受到影响。
+CVE-2022-4779||StreamX应用程序从6.02.01到6.04.34版本受到一个逻辑错误的影响，该错误允许绕过实施的认证方案。使用StreamView HTML组件并激活公共网络服务器功能的StreamX应用程序受到影响。
+CVE-2022-47790||Sourcecodester Dynamic Transaction Queuing System v1.0容易通过/queuing/index.php?page=display&id=发生SQL注入。
+CVE-2022-4780||ISOS 1.81至2.00版本的固件包含来自嵌入式StreamX安装程序的硬编码凭证，集成商未被强制更改。
+CVE-2022-47859||Lead Management System v1.0存在通过changePassword.php的user_id参数进行SQL注入的风险。
+CVE-2022-47860||Lead Management System v1.0 容易通过 removeProduct.php 中的 id 参数发生 SQL 注入。
+CVE-2022-47861||Lead Management System v1.0 容易通过 removeLead.php 中的 id 参数发生 SQL 注入。
+CVE-2022-47862||Lead Management System v1.0 容易通过 ajax_represent.php 中的 customer_id 参数发生 SQL 注入。
+CVE-2022-47864||Lead Management System v1.0 容易通过 removeCategories.php 中的 id 参数发生 SQL 注入。
+CVE-2022-47865||Lead Management System v1.0 容易通过 removeOrder.php 中的 id 参数发生 SQL 注入。
+CVE-2022-47866||Lead management system v1.0 is vulnerable to SQL Injection via the id parameter in removeBrand.php.
+CVE-2022-47895||在2022.3.1之前的JetBrains IntelliJ IDEA中，"验证JSP文件 "动作使用HTTP协议来下载所需的JAR文件。
+CVE-2022-47896||在2022.3.1之前的JetBrains IntelliJ IDEA中，代码模板容易受到SSTI攻击。
+CVE-2022-47908||V-Server v4.0.12.0 及更早版本中基于堆栈的缓冲区溢出漏洞，允许本地攻击者通过让用户打开特制的项目文件，获取信息和/或执行任意代码。
+CVE-2022-47926||AyaCMS 3.1.2存在通过/aya/module/admin/fst_del.inc.php进行文件删除的漏洞。
+CVE-2022-47927||在1.35.9之前的MediaWiki、1.38.5之前的1.36.x到1.38.x以及1.39.1之前的1.39.x中发现一个问题。当用一个预先存在的具有弱权限的数据目录进行安装时，SQLite文件是以文件模式0644创建的，也就是说，本地用户可以阅读世界。这些文件包括凭证数据。
+CVE-2022-47928||在MISP 2.4.167之前，app/View/Templates/upload_file.ctp中的模板文件上传存在XSS。
+CVE-2022-47931||2.0.0之前的IO FinNet tss-lib允许哈希值的碰撞。
+CVE-2022-47932||1.43.34之前的Brave Browser允许远程攻击者通过提到ipfs://或ipns:// URL的精心制作的HTML文件造成拒绝服务。该漏洞是由CVE-2022-47933的不完整修复引起的。
+CVE-2022-47933||1.42.51之前的Brave Browser允许远程攻击者通过引用IPFS方案的精心制作的HTML文件造成拒绝服务。该漏洞是由ipfs::OnBeforeURLRequest_IPFSRedirectWork()函数中的一个未捕获异常引起的，该函数位于ipfs_redirect_network_delegate_helper.cc。
+CVE-2022-47934||1.43.88之前的Brave Browser允许远程攻击者通过精心制作的提到ipfs://或ipns://URL的HTML文件，在私人和访客窗口造成拒绝服务。这是由CVE-2022-47932和CVE-2022-47934的不完整修复引起的。
+CVE-2022-47935||在JT Open（所有版本<V11.1.1.0）、JT Utilities（所有版本<V13.1.1.0）、Solid Edge（所有版本<V2023）中发现一个漏洞。Jt1001.dll在解析特制的JT文件时包含一个内存损坏漏洞。攻击者可利用该漏洞在当前进程的上下文中执行代码。(zdi-can-19078)
+CVE-2022-47938||在Linux内核5.15至5.19前的ksmbd中发现一个问题。fs/ksmbd/smb2misc.c对SMB2_TREE_CONNECT存在越界读取和OOPS。
+CVE-2022-47939||在Linux内核5.15至5.19之前的5.19中的ksmbd发现一个问题。
+CVE-2022-47940||在Linux内核5.15至5.18之前的ksmbd中发现一个问题。fs/ksmbd/smb2pdu.c在smb2_write的非padding情况下缺乏长度验证。
+CVE-2022-47941||在Linux内核5.15至5.19前的ksmbd中发现一个问题。fs/ksmbd/smb2pdu.c在某些smb2_handle_negotiate错误条件下省略了kfree调用，即内存泄漏。
+CVE-2022-47942||在Linux内核5.15至5.19之前的5.19中的ksmbd发现一个问题。在set_ntacl_dacl中存在基于堆的缓冲区溢出，与畸形的SMB2_QUERY_INFO_HE命令后使用SMB2_SET_INFO_HE有关。
+CVE-2022-47943||在Linux内核5.15至5.19之前的5.19中的ksmbd发现一个问题。SMB2_WRITE存在越界读取和OOPS，当在零DataOffset情况下存在大长度时。
+CVE-2022-47945||6.0.14之前的ThinkPHP框架在启用语言包功能（lang_switch_on=true）时允许通过lang参数纳入本地文件。未经认证的远程攻击者可以利用这一点执行任意的操作系统命令，如包括pearcmd.php。
+CVE-2022-47946||在5.10.155之前的Linux内核5.10.x中发现一个问题。fs/io_uring.c中的io_sqpoll_wait_sq存在使用后释放问题，允许攻击者崩溃内核，导致拒绝服务。 finish_wait可以被跳过。在某些情况下，可以通过分叉进程，然后快速终止进程来进行攻击。注意：后来的内核版本，如5.15长期系列，大大改变了io_sqpoll_wait_sq的实现。
+CVE-2022-47949||任天堂NetworkBuffer类，如在《动物之森》中使用。新地平线》2.0.6之前和其他产品中，允许远程攻击者通过一个大的UDP数据包来执行任意代码，导致缓冲区溢出，又称ENLBufferPwn。受害者必须加入与攻击者的游戏会话。其他受影响的产品包括1.2之前的Mario Kart 7，Mario Kart 8，2.1.0之前的Mario Kart 8 Deluxe，5.4.1之前的ARMS，Splatoon，5.5.1之前的Splatoon 2，2022年底之前的Splatoon 3，3.0.2之前的Super Mario Maker 2，以及2022年底之前的Nintendo Switch Sports。
+CVE-2022-47952||lxc-user-nic在lxc到5.0.1中安装了setuid root，并可能允许本地用户推断任何文件是否存在，甚至在受保护的目录树中，因为 "打开失败 "往往表明文件不存在，而 "没有引用网络命名空间路径 "往往表明文件存在。注意：这与CVE-2018-6556不同，因为CVE-2018-6556修复设计的前提是 "我们将向用户报告open()失败，但用户无从得知失败的原因"；然而，在许多现实情况下，除了文件不存在，没有任何合理的失败原因。
+CVE-2022-4796||在0.9.1之前的GitHub仓库usememos/memos中不正确使用特权API。
+CVE-2022-47967||在 Solid Edge（所有版本 < V2023 MP1）中发现一个漏洞。DOCMGMT.DLL 包含一个内存损坏漏洞，在解析不同文件格式（如 PAR、ASM、DFT）的文件时可能被触发。这可能允许攻击者在当前进程的上下文中执行代码。
+CVE-2022-47968||Heimdall Application Dashboard through 2.5.4允许通过 "应用程序名称 "向 "添加应用程序 "页面反映和存储XSS。存储的XSS将在 "应用程序列表 "页面中被触发。
+CVE-2022-4797||在0.9.1之前的GitHub仓库usememos/memos中不正确地限制过多的认证尝试。
+CVE-2022-47974||蓝牙AVRCP模块存在漏洞，可导致DoS攻击。成功利用该漏洞可能导致蓝牙进程重启。
+CVE-2022-47975||DUBAI模块有一个双重自由漏洞。成功利用这个漏洞可能会影响系统的可用性。
+CVE-2022-47976||分布式硬件的DMSDP模块存在漏洞，可能导致冒名控制连接。成功利用此漏洞可能会断开正常的服务连接。
+CVE-2022-4798||GitHub 仓库 usememos/memos 在 0.9.1 之前存在不当授权。
+CVE-2022-4799||0.9.1之前的GitHub仓库usememos/memos中的不当认证。
+CVE-2022-4800||0.9.1之前的GitHub仓库usememos/memos中对通信通道来源的不当验证。
+CVE-2022-4801||0.9.1之前的GitHub仓库usememos/memos的访问控制颗粒度不足。
+CVE-2022-4802||0.9.1之前的GitHub仓库usememos/memos中的不恰当的授权。
+CVE-2022-4803||0.9.1之前的GitHub仓库usememos/memos中的不当访问控制。
+CVE-2022-4804||0.9.1之前的GitHub仓库usememos/memos中的不当授权。
+CVE-2022-4805||0.9.1之前的GitHub仓库usememos/memos中对特权API的不正确使用。
+CVE-2022-4806||0.9.1之前的GitHub仓库usememos/memos中访问控制不正确。
+CVE-2022-4807||0.9.1之前的GitHub存储库usememos/memos中的不当访问控制。
+CVE-2022-4808||0.9.1之前的GitHub仓库usememos/memos中不当的权限管理。
+CVE-2022-4809||0.9.1之前的GitHub仓库usememos/memos中不恰当的访问控制。
+CVE-2022-48090||Tramyardg hotel-mgmt-system 2022.4版存在通过/app/dao/CustomerDAO.php进行SQL注入的风险。
+CVE-2022-48091||Tramyardg hotel-mgmt-system 2022.4版通过process_update_profile.php存在跨站脚本(XSS)漏洞。
+CVE-2022-4810||GitHub 仓库 usememos/memos 在 0.9.1 之前存在不当访问控制。
+CVE-2022-4811||0.9.1之前的GitHub仓库usememos/memos中的不当授权。
+CVE-2022-4812||0.9.1之前的GitHub仓库usememos/memos中比较对象引用而不是对象内容。
+CVE-2022-4813||0.9.1之前的GitHub仓库usememos/memos的访问控制颗粒度不足。
+CVE-2022-4814||0.9.1之前的GitHub仓库usememos/memos中的访问控制不完善。
+CVE-2022-4817||在 centic9 jgit-cookbook 中发现一个漏洞。它已被宣布为有问题。该漏洞影响了未知的代码。操作导致不安全的临时文件。攻击可以从远程启动。该补丁的名称是b8cb29b43dc704708d598c60ac1881db7cf8e9c3。建议应用补丁来修复这个问题。该漏洞的标识符为VDB-216988。
+CVE-2022-4818||在Talend Open Studio for MDM中发现一个漏洞。它已被宣布为有问题。受该漏洞影响的是org.talend.dmm.core/src/com/amalto/core/storage/SystemStorageWrapper.java文件的一个未知功能。该操作导致xml外部实体引用。升级到20221220_1938版本能够解决这个问题。该补丁的名称是95590db2ad6a582c371273ceab1a73ad6ed47853。建议升级受影响的组件。识别码VDB-216997被分配给这个漏洞。
+CVE-2022-4819||HotCRP中发现一个漏洞。它已被评为有问题。受此问题影响的是一些未知功能。该操作导致跨网站脚本攻击。该攻击可能会被远程启动。该补丁的名称是d4ffdb0ef806453c54ddca7fdda3e5c60356285c。建议应用一个补丁来修复这个问题。VDB-216998是分配给这个漏洞的标识符。
+CVE-2022-48194||TP-Link TL-WR902AC设备通过V3 0.9.1允许远程认证的攻击者通过上传精心制作的固件更新执行任意代码或导致拒绝服务（DoS），因为签名检查不充分。
+CVE-2022-48195||0.3.1之前的Mellium mellium.im/sasl中发现一个问题。当执行基于SCRAM的SASL认证时，如果远程端宣传支持通道绑定，则不会生成随机nonce（相反，nonce为空）。这在最好的情况下会导致认证失败，但（如果与不验证nonce长度的远程端配对）可能导致在认证期间使用的随机性不足。
+CVE-2022-48196||某些NETGEAR设备受到未经认证的攻击者的缓冲区溢出的影响。这影响到1.0.2.60之前的RAX40、1.0.2.60之前的RAX35、1.0.4.122之前的R6400v2、1.0.4.122之前的R6700v3、1.3.3.152之前的R6900P、1.3.3.152之前的R7000P、1.0.11.136之前的R7000、1.4.4.94之前的R7960P和1.4.4.94之前的R8000P。
+CVE-2022-48197||**分配时不支持 ** YUI2到2800的TreeView中存在反映的跨站脚本（XSS）：up.php sam.php renderhidden.php removechildren.php removeall.php readd.php overflow.php newnode2.php newnode.php。注意：该漏洞只影响到维护者不再支持的产品。
+CVE-2022-48198||机器人操作系统（ROS）1.3.0之前的ntpd_driver组件和2.x之前的2.2.0组件允许攻击者在同一ROS应用程序中控制不同节点的源代码，从而改变机器人的行为。这是因为主题名称取决于攻击者控制的time_ref_topic参数。
+CVE-2022-4820||在FlatPress中发现一个被列为问题的漏洞。这影响到组件管理区的文件admin/panels/entry/admin.entry.list.php的一个未知部分。该操作导致跨网站脚本攻击。它有可能远程启动攻击。该补丁的名称是229752b51025e678370298284d42f8ebb231f67f。建议应用补丁来修复这个问题。该漏洞的相关标识符为VDB-216999。
+CVE-2022-4821||在FlatPress中发现一个归类为问题的漏洞。该漏洞影响到组件XML文件处理程序/MD文件处理程序的admin/panels/uploader/admin.uploader.php文件的onupload功能。该操作会导致跨网站脚本攻击。该攻击可以远程启动。该补丁的名称是3cc223dec5260e533a84b5cf5780d3a4fbf21241。建议应用补丁来修复这个问题。该漏洞的标识符为VDB-217000。
+CVE-2022-48216||1.1.0之前的Uniswap Universal Router错误地处理了重入。这将允许窃取资金。
+CVE-2022-48217||***DISPUTED **机器人操作系统（ROS）的tf_remapper_node组件1.1.1允许攻击者在同一ROS应用程序中控制不同节点的源代码，从而改变机器人的行为。出现这种情况是因为主题名称取决于攻击者控制的old_tf_topic_name和/或new_tf_topic_name参数。注意：供应商的立场是 "程序员有责任确保只设置已知和必需的参数，不设置意外的参数"。
+CVE-2022-4822||在FlatPress中发现一个漏洞，该漏洞被列为问题。该问题影响到组件Setup的setup/lib/main.lib.php文件的一些未知处理。该操作会导致跨网站脚本攻击。该攻击可能是远程启动的。该补丁的名称是5f23b4c2eac294cc0ba5e541f83a6f8a26f9fed1。建议应用一个补丁来修复这个问题。识别码VDB-217001被分配给这个漏洞。
+CVE-2022-4823||在InSTEDD Nuntium发现一个漏洞，该漏洞被归类为有问题。受影响的是文件app/controllers/geopoll_controller.rb的一个未知函数。对参数签名的操作导致了可观察到的时间差异。有可能远程发起攻击。该补丁的名称是77236f7fd71a0e2eefeea07f9866b069d612cf0d。建议应用补丁来修复这个问题。VDB-217002是分配给该漏洞的标识符。
+CVE-2022-48251||**DISPUTED ** ARMv8平台上的AES指令没有 "本质上抵抗 "侧信道攻击的算法。注意：据报道，供应商提供的立场是 "虽然电源侧信道攻击......是可能的，但它们不是由Arm架构直接引起的，也与Arm架构无关"。
+CVE-2022-48252|| Pi.Alert的jokob-sk/pi.Alert分叉（22.12.20之前）允许通过nmap_scan.php（扫描参数）操作系统命令注入进行远程代码执行。
+CVE-2022-48253||Nostromo 2.1之前的nhttpd存在路径遍历漏洞，可能允许攻击者在远程服务器上执行任意命令。该漏洞在使用 homedirs 选项时发生。
+CVE-2022-48256||Technitium DNS Server before 10.0允许自我CNAME拒绝服务攻击，其中一个CNAME循环导致一个答案包含数百条记录。
+CVE-2022-48257||在 Eternal Terminal 6.2.1 中，etserver 和 etclient 在 /tmp 中有可预测的日志文件名。
+CVE-2022-48258||在 Eternal Terminal 6.2.1, etserver 和 etclient 有世界可读的日志文件。
+CVE-2022-4839||跨站脚本(XSS) - 存储在0.9.1之前的GitHub仓库usememos/memos。
+CVE-2022-4840||跨站脚本(XSS) - 存储于0.9.1之前的GitHub仓库usememos/memos。
+CVE-2022-4841||跨站脚本(XSS) - 存储在0.9.1之前的GitHub仓库usememos/memos中。
+CVE-2022-4842||在Linux内核NTFS3驱动函数attr_punch_hole()中发现一个NULL指针解读的缺陷。本地用户可利用此缺陷使系统崩溃。
+CVE-2022-4843||GitHub仓库radareorg/radare2在5.8.2之前存在NULL指针解读。
+CVE-2022-4844||0.9.1之前的GitHub仓库usememos/memos中的跨站请求伪造（CSRF）。
+CVE-2022-4845||0.9.1之前的GitHub仓库usememos/memos中的跨站请求伪造（CSRF）。
+CVE-2022-4846||0.9.1之前的GitHub仓库usememos/memos中的跨站请求伪造（CSRF）。
+CVE-2022-4847||0.9.1之前的GitHub仓库usememos/memos中，通信通道中不正确地指定了目的地。
+CVE-2022-4848||0.9.1之前的GitHub仓库usememos/memos中对通信通道的源头验证不当。
+CVE-2022-4849||0.9.1之前的GitHub仓库usememos/memos中的跨站请求伪造（CSRF）。
+CVE-2022-4850||0.9.1之前的GitHub仓库usememos/memos中的跨站请求伪造（CSRF）。
+CVE-2022-4851||0.9.1之前的GitHub仓库usememos/memos中对值的不正确处理。
+CVE-2022-4855||SourceCodester Lead Management System 1.0中发现一个漏洞，该漏洞被归类为关键。受影响的是文件login.php的一个未知功能。对参数username的操作导致了sql注入。有可能远程发起攻击。该漏洞已向公众披露，并可能被使用。此漏洞的标识符为VDB-217020。
+CVE-2022-4856在7.5.1以下的Modbus Tools Modbus Slave中发现一个漏洞，并被归类为危急。受该漏洞影响的是组件mbs文件处理程序的mbslave.exe文件的未知功能。该操作会导致缓冲区溢出。该攻击可以远程启动。该漏洞已向公众披露，并可能被使用。识别码VDB-217021被分配给该漏洞。
+CVE-2022-4857||在Modbus Tools Modbus Poll至9.10.0中发现一个漏洞，并被归类为危急。受此问题影响的是组件mbp文件处理程序的mbpoll.exe文件的一些未知功能。该操作会导致缓冲区溢出。该攻击可能是远程启动的。该漏洞已被披露给公众，并可能被使用。VDB-217022是分配给此漏洞的标识符。
+CVE-2022-4858||在22.10.11846.0之前的M-Files服务器的日志文件中插入敏感信息，如果设置了特定的配置，可能会允许从日志中获得敏感标记。
+CVE-2022-4859||在Joget至7.0.33版本中发现一个被列为问题的漏洞。该问题影响到用户配置文件菜单组件的文件wflow-core/src/main/java/org/joget/plugin/enterprise/UserProfileMenu.java中的函数submitForm。对参数firstName/lastName的操作导致了跨网站脚本。该攻击可能是远程启动的。升级到7.0.34版本能够解决这个问题。该补丁的名称是9a77f508a2bf8cf661d588f37a4cc29ecaea4fc8。建议升级受影响的组件。该漏洞的相关标识符为VDB-217055。
+CVE-2022-4860||在KBase Metrics中发现一个漏洞。它已被归类为关键。该漏洞影响文件 source/daily_cron_jobs/methods_upload_user_stats.py 中的函数 upload_user_data。该操作导致了sql注入。该补丁的名称是959dfb6b05991e30b0fa972a1ecdcaae8e1dae6d。建议应用补丁来修复这个问题。该漏洞的相关标识符为VDB-217059。
+CVE-2022-4861||22.5.11356.0之前的M-Files客户端的认证协议实施不正确，允许高权限用户获得其他用户的令牌，以获得另一个资源。
+CVE-2022-4863||0.9.1之前的GitHub仓库usememos/memos中对不足权限或特权的处理不当。
+CVE-2022-4864||GitHub 仓库 froxlor/froxlor 在 2.0.0-beta1 之前存在参数注入。
+CVE-2022-4865||跨站脚本(XSS) - 存储于0.9.1之前的GitHub仓库usememos/memos。
+CVE-2022-4866||跨站脚本(XSS) - 存储于0.9.1之前的GitHub仓库usememos/memos。
+CVE-2022-4867||跨站请求伪造(CSRF)在GitHub仓库froxlor/froxlor在2.0.0-beta1之前。
+CVE-2022-4868||GitHub 仓库 froxlor/froxlor 在 2.0.0-beta1 之前存在不正当授权。
+CVE-2022-4869||在 Evolution Events Artaxerxes 中发现一个漏洞。它已被宣布为有问题。该漏洞影响组件 POST Parameter Handler 的 arta/common/middleware.py 文件中的未知代码。对参数密码的操作导致了信息泄露。该攻击可在远程启动。该补丁的名称是022111407d34815c16c6eada2de69ca34084dc0d。建议应用补丁来修复这个问题。VDB-217438是分配给这个漏洞的标识符。
+CVE-2022-4871||在ummmmm nflpick-em.com至2.2.x中发现一个被列为问题的漏洞。该漏洞影响html/includes/runtime/admin/JSON/LoadUsers.php文件中的函数_Load_Users。对参数sort的操作导致了sql注入。该攻击可以从远程发起。该补丁的名称是dd77a35942f527ea0beef5e0ec62b92e8b93211e。建议应用一个补丁来修复这个问题。VDB-217270是分配给这个漏洞的标识符。注意：JSON入口只能通过管理员账户访问
+CVE-2022-4873||在Netcomm路由器型号NF20MESH、NF20和NL1902上，基于堆栈的缓冲区溢出影响了sessionKey参数。通过提供特定的字节数，指令指针能够在堆栈上被覆盖，并在已知位置使应用程序崩溃。
+CVE-2022-4874||Netcomm路由器型号NF20MESH、NF20和NL1902中的认证绕过允许未经认证的用户访问内容。为了提供静态内容，应用程序执行检查URL（.css、.png等）中是否存在特定字符。如果它存在，它会执行一个 "假登录"，给请求一个活动会话来加载文件，而不是重定向到登录页面。
+CVE-2022-4875||在fossology中发现了一个漏洞，并被归类为有问题的漏洞。该漏洞影响到未知代码。对参数sql/VarValue的操作导致了跨网站脚本攻击。该攻击可在远程启动。该补丁的名称是8e0eba001662c7eb35f045b70dd458a4643b4553。建议应用一个补丁来修复这个问题。VDB-217426是分配给该漏洞的标识符。
+CVE-2022-4876||在Kaltura mwEmbed至2.96.rc1中发现一个漏洞，并将其列为问题。该问题影响到文件includes/DefaultSettings.php的一些未知处理。对参数HTTP_X_FORWARDED_HOST的操作导致了跨网站脚本攻击。该攻击可能是远程启动的。升级到2.96.rc2版本能够解决这个问题。该补丁的名称是13b8812ebc8c9fa034eed91ab35ba8423a528c0b。建议升级受影响的组件。该漏洞的相关标识符为VDB-217427。
+CVE-2022-4877||在snoyberg keter至1.8.1中发现一个漏洞，并将其归类为问题。该漏洞影响到Keter/Proxy.hs文件的未知代码。对参数主机的操作会导致跨网站脚本攻击。该攻击可以远程启动。升级到1.8.2版本能够解决这个问题。该补丁的名称是d41f3697926b231782a3ad8050f5af1ce5cc40b7。建议升级受影响的组件。该漏洞的标识符为VDB-217444。
+CVE-2022-4878||在JATOS中发现了一个被列为关键的漏洞。受影响的是组件ZIP Handler的modules/common/app/utils/common/ZipUtil.java文件中的函数ZipUtil。该操作会导致路径遍历。升级到3.7.5-alpha版本，能够解决这个问题。该补丁的名称是2b42519f309d8164e8811392770ce604cdabb5da。建议升级受影响的组件。该漏洞的标识符为VDB-217548。
+CVE-2022-4879||在Forged Alliance Forever高达3746中发现一个漏洞。它已被宣布为关键。受此漏洞影响的是组件Vote Handler的一个未知功能。该操作会导致不适当的授权。升级到3747版本能够解决这个问题。该补丁的名称是6880971bd3d73d942384aff62d53058c206ce644。建议升级受影响的组件。该漏洞的相关标识符为VDB-217555。
+CVE-2022-4880||在stakira OpenUtau中发现一个漏洞。该漏洞已被归类为危急。该漏洞影响到组件ZIP Archive Handler的OpenUtau.Core/Classic/VoicebankInstaller.cs文件中的函数VoicebankInstaller。该操作会导致路径遍历。升级到0.0.991版本能够解决这个问题。该补丁的名称是849a0a6912aac8b1c28cc32aa1132a3140caff4a。建议升级受影响的组件。识别码VDB-217617被分配给这个漏洞。
+CVE-2022-4881||在 CapsAdmin PAC3 中发现一个漏洞。它已被评为有问题。受此问题影响的是文件lua/pac3/core/shared/http.lua的一些未知功能。对参数url的操作导致了跨网站脚本攻击。该攻击可能是远程发起的。该补丁的名称是8fc9e12dfa21d757be6eb4194c763e848b299ac0。建议应用一个补丁来修复这个问题。VDB-217646是分配给该漏洞的标识符。
+CVE-2022-4882||在kaltura mwEmbed中发现了一个漏洞，直到2.91。它被评为有问题。受该问题影响的是组件共享插件的modules/KalturaSupport/components/share/share.js文件的一些未知功能。对参数res的操作会导致跨网站脚本攻击。该攻击可能是远程启动的。该漏洞已向公众披露，可能会被使用。升级到2.92.rc1版本能够解决这个问题。该补丁的名称是4f11b6f6610acd6d89de5f8be47cf7c610643845。建议升级受影响的组件。该漏洞的标识符为VDB-217664。
+CVE-2022-4884||Tribe29 Checkmk <=2.0.0p32 and <=2.1.0p18中MKP存储的路径遍历允许管理员通过恶意的mkp文件将mkp文件写入任意位置。
+CVE-2022-4885|||在0.3以下的sviehb jefferson中发现了一个漏洞，并将其归类为关键。该漏洞影响了文件 src/scripts/jefferson 的未知代码。该操作导致路径遍历。该攻击可以远程启动。升级到0.4版本能够解决这个问题。该补丁的名称是53b3f2fc34af0bb32afbcee29d18213e61471d87。建议升级受影响的组件。该漏洞的标识符为VDB-218020。
+CVE-2022-4889|||在visegripped Stracker中发现一个被列为关键的漏洞。受该漏洞影响的是doc_root/public_html/stracker/api.php文件中的getHistory函数。对参数符号/startDate/endDate的操作导致了sql注入。该补丁的名称是63e1b040373ee5b6c7d1e165ecf5ae1603d29e0a。建议应用一个补丁来修复这个问题。识别码VDB-218377被分配给这个漏洞。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

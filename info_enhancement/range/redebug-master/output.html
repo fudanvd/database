@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ReDeBug - Report</title>
+    <style type="text/css">
+    .container { padding: 3px 3px 3px 3px; font-size: 14px; }
+    .patch { background-color: #CCCCCC; border: 2px solid #555555; margin: 0px 0px 5px 0px }
+    .source { background-color: #DDDDDD; padding: 3px 3px 3px 3px; margin: 0px 0px 5px 0px }
+    .filepath { font-size: small; font-weight: bold; color: #0000AA; padding: 5px 5px 5px 5px; }
+    .codechunk { font-family: monospace; font-size: small; white-space: pre-wrap; padding: 0px 0px 0px 50px; }
+    .linenumber { font-family: monospace; font-size: small; float: left; color: #777777; }
+    </style>
+    <script language="javascript">
+        function togglePrev(node) {
+            var targetDiv = node.previousSibling;
+            targetDiv.style.display = (targetDiv.style.display=='none')?'block':'none';
+            node.innerHTML = (node.innerHTML=='+ show +')?'- hide -':'+ show +';
+        }
+        function toggleNext(node) {
+            var targetDiv = node.nextSibling;
+            targetDiv.style.display = (targetDiv.style.display=='none')?'block':'none';
+            node.innerHTML = (node.innerHTML=='+ show +')?'- hide -':'+ show +';
+        }
+    </script>
+</head>
+<body>
+<div style="width: 100%; margin: 0px auto">
+    <b># <i>unpatched code clones:</i> <font style="color:red">2</font></b>
+    <div class="container">
+        <br />
+        <div class="patch">
+            <div class="filepath">[C:\Users\HP1\Desktop\CVE-2021-25640!!\diff\cve.diff] PojoUtils.java #1</div>
+            <div class="codechunk">         if (pojo instanceof Map&lt;?, ?&gt; && type != null) {
+             Object className = ((Map&lt;Object, Object&gt;) pojo).get("class");
+             if (className instanceof String) {
+<font color="#00AA00">+                SerializeClassChecker.getInstance().validateClass((String) className);
+</font>                 try {
+                     type = ClassHelper.forName((String) className);
+                 } catch (ClassNotFoundException e) {
+</div>
+        </div>
+        <div class="source">
+            <div class="filepath">C:\Users\HP1\Desktop\CVE-2021-25640!!\dubbo-dubbo-2.6.8\dubbo-common\src\main\java\com\alibaba\dubbo\common\utils\PojoUtils.java</div>
+            <div style="display: none">
+                <div class="linenumber">
+                361<br />
+                362<br />
+                363<br />
+                364<br />
+                365<br />
+                366<br />
+                367<br />
+                368<br />
+                369<br />
+                370<br />
+                </div>
+                <div class="codechunk">                    if (keyType instanceof Class) {
+                        keyClazz = (Class&lt;?&gt;) keyType;
+                    }
+                    Object value = realize0(obj, keyClazz, keyType, history);
+                    dest.add(value);
+                }
+                return dest;
+            }
+        }
+</div>
+            </div><a href="javascript:;" onclick="togglePrev(this);">+ show +</a>
+            <div>
+                <div class="linenumber">
+                371<br />
+                372<br />
+                373<br />
+                374<br />
+                375<br />
+                376<br />
+                </div>
+                <div class="codechunk">        if (pojo instanceof Map&lt;?, ?&gt; &amp;&amp; type != null) {
+            Object className = ((Map&lt;Object, Object&gt;) pojo).get(&quot;class&quot;);
+            if (className instanceof String) {
+                try {
+                    type = ClassHelper.forName((String) className);
+                } catch (ClassNotFoundException e) {</div>
+            </div>
+            <a href="javascript:;" onclick="toggleNext(this);">+ show +</a><div style="display: none">
+                <div class="linenumber">
+                377<br />
+                378<br />
+                379<br />
+                380<br />
+                381<br />
+                382<br />
+                383<br />
+                384<br />
+                385<br />
+                386<br />
+                </div>
+                <div class="codechunk">                    // ignore
+                }
+            }
+
+            // special logic for enum
+            if (type.isEnum()) {
+                Object name = ((Map&lt;Object, Object&gt;) pojo).get(&quot;name&quot;);
+                if (name != null) {
+                    return Enum.valueOf((Class&lt;Enum&gt;) type, name.toString());
+                }</div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <br />
+        <div class="patch">
+            <div class="filepath">[C:\Users\HP1\Desktop\CVE-2021-25640!!\diff\cve.diff] StringUtils.java #1</div>
+            <div class="codechunk">         }
+         return buf.toString();
+     }
+<font color="#00AA00">+
+</font><font color="#00AA00">+    public static String toOSStyleKey(String key) {
+</font><font color="#00AA00">+        key = key.toUpperCase().replaceAll(Constants.DOT_REGEX, Constants.UNDERLINE_SEPARATOR);
+</font><font color="#00AA00">+        if (!key.startsWith("DUBBO_")) {
+</font><font color="#00AA00">+            key = "DUBBO_" + key;
+</font><font color="#00AA00">+        }
+</font><font color="#00AA00">+        return key;
+</font><font color="#00AA00">+    }
+</font> }
+</div>
+        </div>
+        <div class="source">
+            <div class="filepath">C:\Users\HP1\Desktop\CVE-2021-25640!!\dubbo-dubbo-2.6.8\dubbo-common\src\main\java\com\alibaba\dubbo\common\utils\StringUtils.java</div>
+            <div style="display: none">
+                <div class="linenumber">
+                417<br />
+                418<br />
+                419<br />
+                420<br />
+                421<br />
+                422<br />
+                423<br />
+                424<br />
+                425<br />
+                426<br />
+                </div>
+                <div class="codechunk">            if (arg == null || ReflectUtils.isPrimitives(arg.getClass())) {
+                buf.append(arg);
+            } else {
+                try {
+                    buf.append(JSON.toJSONString(arg));
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
+                    buf.append(arg);
+                }
+            }</div>
+            </div><a href="javascript:;" onclick="togglePrev(this);">+ show +</a>
+            <div>
+                <div class="linenumber">
+                427<br />
+                428<br />
+                429<br />
+                430<br />
+                </div>
+                <div class="codechunk">        }
+        return buf.toString();
+    }
+}</div>
+            </div>
+            <a href="javascript:;" onclick="toggleNext(this);">+ show +</a><div style="display: none">
+                <div class="linenumber">
+                </div>
+                <div class="codechunk"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
