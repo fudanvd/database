@@ -1,0 +1,13 @@
+diff --git a/demos/autocomplete/combobox.html b/demos/autocomplete/combobox.html
+index 6229d47b216..8c6f59fc198 100644
+--- a/demos/autocomplete/combobox.html
++++ b/demos/autocomplete/combobox.html
+@@ -61,7 +61,7 @@
+ 						// remove invalid value, as it didn't match anything
+ 						$( element )
+ 							.val( "" )
+-							.attr( "title", value + " didn't match any item" )
++							.attr( "title", $( "<a>" ).text( value ).html() + " didn't match any item" )
+ 							.tooltip( "open" );
+ 						select.val( "" );
+ 						setTimeout(function() {

@@ -1,0 +1,53 @@
+diff --git a/alpha/apps/kaltura/lib/kalturaAction.class.php b/alpha/apps/kaltura/lib/kalturaAction.class.php
+index d9f0bfe6e7a..faf8088b3fe 100644
+--- a/alpha/apps/kaltura/lib/kalturaAction.class.php
++++ b/alpha/apps/kaltura/lib/kalturaAction.class.php
+@@ -453,21 +453,7 @@ protected function setExpiryCredential ( $cred_name , $ttl_in_sec )
+  
+   protected function getUserzoneCookie() 
+   {
+-  	$cookie = $this->getContext()->getRequest()->getCookie('userzone');
+-  	$length = strlen($cookie);
+-  	if ($length <= 0)
+-  		return null;
+-  		
+-  	$serialized_data = substr($cookie, 0, $length - 32);
+-  	$hash_signiture = substr($cookie, $length - 32);
+-  	  	 
+-  	// check the signiture
+-  	if (md5($serialized_data . $this->cookieSecret) != $hash_signiture)
+-  		return null;
+-  	
+-  	$userzone_data = unserialize(base64_decode($serialized_data));
+-  	
+-  	return array($userzone_data['id'], $userzone_data['email'], $userzone_data['screenname']);
++  	return null;
+   }
+   
+   protected function followRedirectCookie()
+diff --git a/alpha/apps/kaltura/modules/system/actions/helperAction.class.php b/alpha/apps/kaltura/modules/system/actions/helperAction.class.php
+index da0b083fd94..24b2d044632 100644
+--- a/alpha/apps/kaltura/modules/system/actions/helperAction.class.php
++++ b/alpha/apps/kaltura/modules/system/actions/helperAction.class.php
+@@ -28,7 +28,7 @@ public function execute()
+ 		}
+ 		elseif ( $algo == "wiki_decode" )
+ 		{
+-			$res = @unserialize ( base64_decode (str_replace ( array ( "|02" , "|01" ) , array ( "/" , "|" ) , $str ) ) ) ;
++			$res = null;
+ 		}
+ 		elseif ( $algo == "wiki_decode_no_serialize" )
+ 		{
+diff --git a/plugins/admin_console/kaltura_internal_tools/admin/KalturaInternalToolsSystemHelperAction.php b/plugins/admin_console/kaltura_internal_tools/admin/KalturaInternalToolsSystemHelperAction.php
+index c7ebd78842d..77fa4ceec19 100644
+--- a/plugins/admin_console/kaltura_internal_tools/admin/KalturaInternalToolsSystemHelperAction.php
++++ b/plugins/admin_console/kaltura_internal_tools/admin/KalturaInternalToolsSystemHelperAction.php
+@@ -51,7 +51,7 @@ public function doAction(Zend_Controller_Action $action)
+ 		}
+ 		elseif ( $algo == "wiki_decode" )
+ 		{
+-			$res = @unserialize ( base64_decode (str_replace ( array ( "|02" , "|01" ) , array ( "/" , "|" ) , $str ) ) ) ;
++			$res = null;
+ 		}
+ 		elseif ( $algo == "wiki_decode_no_serialize" )
+ 		{

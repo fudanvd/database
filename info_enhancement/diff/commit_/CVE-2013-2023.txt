@@ -1,0 +1,105 @@
+diff --git a/actionscript/Jplayer.as b/actionscript/Jplayer.as
+index 4451954c..2b96675a 100644
+--- a/actionscript/Jplayer.as
++++ b/actionscript/Jplayer.as
+@@ -8,7 +8,7 @@
+  *  - http://www.gnu.org/copyleft/gpl.html
+  *
+  * Author: Mark J Panaghiston
+- * Version: 2.3.1
++ * Version: 2.3.2
+  * Date: 14th May 2013
+  *
+  * FlashVars expected: (AS3 property of: loaderInfo.parameters)
+@@ -223,10 +223,15 @@ package {
+ 			}
+ 		}
+ 		private function checkFlashVars(p:Object):void {
+-			// Check for direct access. Inspired by mediaelement.js - Also added name to object for non-IE browsers.
++			// Check for direct access. Inspired by mediaelement.js - Also added name to HTML object for non-IE browsers.
+ 			if(ExternalInterface.objectID != null && ExternalInterface.objectID.toString() != "") {
+ 				for each (var s:String in p) {
+-					if(illegalChar(s) || illegalWord(s)) {
++					if(illegalChar(s)) {
++						securityIssue = true; // Found a security concern.
++					}
++				}
++				if(!securityIssue) {
++					if(jQueryIllegal(p.jQuery)) {
+ 						securityIssue = true; // Found a security concern.
+ 					}
+ 				}
+@@ -239,17 +244,10 @@ package {
+ 			var validParam:RegExp = /^[-A-Za-z0-9_.]+$/;
+ 			return !validParam.test(s);
+ 		}
+-		private function illegalWord(s:String):Boolean {
+-			// A blacklist of JavaScript commands that are a security concern.
+-			var illegals:String = "eval document alert confirm prompt console";
+-			if(Boolean(s)) { // Otherwise exception if parameter null.
+-				for each (var illegal:String in illegals.split(' ')) {
+-					if(s.indexOf(illegal) >= 0) {
+-						return true; // Illegal word found
+-					}
+-				}
+-			}
+-			return false;
++		private function jQueryIllegal(s:String):Boolean {
++			// Check param contains the term jQuery.
++			var validParam:RegExp = /(jQuery)/;
++			return !validParam.test(s);
+ 		}
+ 		// switchType() here
+ 		private function listenToMp3(active:Boolean):void {
+diff --git a/actionscript/happyworm/jPlayer/JplayerStatus.as b/actionscript/happyworm/jPlayer/JplayerStatus.as
+index 8a312fbd..257679cb 100644
+--- a/actionscript/happyworm/jPlayer/JplayerStatus.as
++++ b/actionscript/happyworm/jPlayer/JplayerStatus.as
+@@ -14,7 +14,7 @@
+ package happyworm.jPlayer {
+ 	public class JplayerStatus {
+ 
+-		public static const VERSION:String = "2.3.1"; // The version of the Flash jPlayer entity.
++		public static const VERSION:String = "2.3.2"; // The version of the Flash jPlayer entity.
+ 
+ 		public var volume:Number = 0.5; // Not affected by reset()
+ 		public var muted:Boolean = false; // Not affected by reset()
+diff --git a/jquery.jplayer/Jplayer.swf b/jquery.jplayer/Jplayer.swf
+index e2c66370..7cd1fdf6 100644
+Binary files a/jquery.jplayer/Jplayer.swf and b/jquery.jplayer/Jplayer.swf differ
+diff --git a/jquery.jplayer/jquery.jplayer.js b/jquery.jplayer/jquery.jplayer.js
+index cf22a33d..f1d002a8 100644
+--- a/jquery.jplayer/jquery.jplayer.js
++++ b/jquery.jplayer/jquery.jplayer.js
+@@ -8,7 +8,7 @@
+  *  - http://www.gnu.org/copyleft/gpl.html
+  *
+  * Author: Mark J Panaghiston
+- * Version: 2.3.1
++ * Version: 2.3.2
+  * Date: 14th May 2013
+  */
+ 
+@@ -454,8 +454,8 @@
+ 	$.jPlayer.prototype = {
+ 		count: 0, // Static Variable: Change it via prototype.
+ 		version: { // Static Object
+-			script: "2.3.1",
+-			needFlash: "2.3.1",
++			script: "2.3.2",
++			needFlash: "2.3.2",
+ 			flash: "unknown"
+ 		},
+ 		options: { // Instanced in $.jPlayer() constructor
+diff --git a/package.json b/package.json
+index d059fc48..2fbd123d 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "jplayer",
+-  "version": "2.3.1",
++  "version": "2.3.2",
+   "description": "The jQuery HTML5 Audio / Video Library",
+   "homepage": "http://www.jplayer.org/",
+   "keywords": [

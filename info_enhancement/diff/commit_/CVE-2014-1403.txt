@@ -1,0 +1,59 @@
+diff --git a/build.xml b/build.xml
+index 19c98626..d2df4ab8 100644
+--- a/build.xml
++++ b/build.xml
+@@ -4,7 +4,7 @@
+ 	<property file="build.secret.properties"/>
+ 	<property name="project.build.artifactdir" value="./artifacts/"/>
+ 	<property name="project.build.publishdir" value="./artifacts/"/>
+-	<property name="project.build.version" value="2.4.18"/>
++	<property name="project.build.version" value="2.4.19"/>
+ 	
+ 	<!-- Setup classpath for js-build-tools ant tasks -->
+ 	<path id="js-build-tasks.classpath">
+diff --git a/src/Fn.js b/src/Fn.js
+index 271e0478..d29fb329 100644
+--- a/src/Fn.js
++++ b/src/Fn.js
+@@ -58,6 +58,9 @@
+             // #ifdef debug
+             this._trace("retrieving function " + name);
+             // #endif
++            if (!_map.hasOwnProperty(name)) {
++                return;
++            }
+             var fn = _map[name];
+             // #ifdef debug
+             if (!fn) {
+diff --git a/src/changes.html b/src/changes.html
+index d8bec02e..56e2e1f1 100644
+--- a/src/changes.html
++++ b/src/changes.html
+@@ -5,6 +5,13 @@
+     </head>
+     <body>
+         <ul>
++             <li>
++                2.4.19 18.01.14
++                <br/>
++                Removed XSS vulnerability:
++                <br/>
++                - XSS due to lack of validation in name.html (CVE-2014-1403) - disclosed by Krzystof Kotowicz (Cure53)
++            </li>
+             <li>
+                 2.4.18 21.09.13
+                 <br/>
+diff --git a/src/name.html b/src/name.html
+index d30e7b2f..aab6a82a 100644
+--- a/src/name.html
++++ b/src/name.html
+@@ -24,6 +24,9 @@
+                 else {
+                     channel = hash.substring(0, indexOf);
+                     url = decodeURIComponent(hash.substring(indexOf + 1));
++                    if (url && !/https?:\/\//.test(url)) {
++                        throw new Error('Invalid url');
++                    }
+                 }
+                 switch (location.hash.substring(2, 3)) {
+                     case "2":
