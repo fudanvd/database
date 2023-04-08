@@ -25,6 +25,11 @@
  <br/>main.py 源文件
  <br/>CVE Description_CN.txt 翻译后文件
  <br/>CVE Description.txt 翻译前文件
+* **diff**   漏洞触发点
+<br/> commit_   9838个漏洞的触发点（diff文件形式）
+<br/> Reference_commit.py 爬虫代码
+<br/>removebaddiff.py 取出爬取失败的触发点的代码
+
 
 ### ④nvd_info NVD的数据部分
 * **info downloaded from nvd NVD** 网站上爬下来的数据
